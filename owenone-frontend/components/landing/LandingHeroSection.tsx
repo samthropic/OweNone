@@ -12,18 +12,12 @@ import { LandingNetwork } from "./LandingNetwork";
 export function LandingHeroSection() {
   return (
     <section className="hero">
-      <div className="hero-copy">
-        <div className="eyebrow">
-          <span className="eyebrow-dot" />
-          Financial graph compression for modern social networks
-        </div>
-      </div>
-      <div className="hero-grid">
+      <div className="hero-grid item-stretch">
         <div>
-          <h1>
-            Shared money,
+          <h1 className="font-bold tracking-tight text-slate-800">
+            Drowning in group IOU's?
             <br />
-            <span className="subtle">reduced to elegance.</span>
+            <span className="text-slate-400">We untangle the mess.</span>
           </h1>
           <p className="lead">
             OweNone transforms fragmented group expenses into the minimum
@@ -49,13 +43,14 @@ export function LandingHeroSection() {
           </div>
         </div>
 
-        <aside className="panel-wrap">
-          <div className="float-metric">
+        <aside className="panel-wrap h-full">
+          {/* Maybe: Add float metric - looks off tho */}
+          {/* <div className="float-metric">
             <div className="tiny">Network efficiency</div>
             <div className="big">-50%</div>
             <div className="small">transfers in live example</div>
-          </div>
-          <div className="graph-panel">
+          </div> */}
+          <div className="graph-panel h-full flex flex-col">
             <div className="panel-head">
               <div>
                 <div className="panel-title">Live network calculation</div>
@@ -74,7 +69,7 @@ export function LandingHeroSection() {
                       3 transfers across overlapping balances
                     </div>
                   </div>
-                  <div className="graph-badge">Raw graph</div>
+                  {/* <div className="graph-badge">Raw graph</div> */}
                 </div>
                 <LandingNetwork
                   nodes={NETWORK_NODES}
@@ -98,7 +93,7 @@ export function LandingHeroSection() {
                       2 transfers after global netting
                     </div>
                   </div>
-                  <div className="graph-badge">Optimal state</div>
+                  {/* <div className="graph-badge">Optimal state</div> */}
                 </div>
                 <LandingNetwork
                   nodes={NETWORK_NODES}
@@ -115,7 +110,7 @@ export function LandingHeroSection() {
                 </div>
               </div>
             </div>
-            <div className="mini-stats">
+            <div className="mini-stats mt-auto">
               {MINI_STATS.map((stat) => (
                 <div key={stat.value} className="mini-stat">
                   <div className="v">{stat.value}</div>

@@ -5,7 +5,7 @@ export function LandingNavBar() {
   return (
     <nav className="landing-nav" aria-label="Primary">
       <Link href="/" className="brand">
-        <span className="brand-mark">SS</span>
+        <span className="brand-mark">∞</span>
         <span className="brand-copy">
           <strong>OweNone</strong>
           <small>Luxury infrastructure for shared money</small>

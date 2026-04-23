@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { DM_Sans, Syne } from "next/font/google";
+import { Inter } from 'next/font/google';
 import "./globals.css";
+
+// Configure Inter
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter', // This matches the CSS variable you just set
+  display: 'swap',
+});
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -20,14 +28,29 @@ export const metadata: Metadata = {
     "The social graph debt compressor: fewer payments, live sync, explainable settlements for trips, flats, and dinners.",
 };
 
+// export default function RootLayout({
+//   children,
+// }: Readonly<{
+//   children: React.ReactNode;
+// }>) {
+//   return (
+//     <html lang="en" className={`${dmSans.variable} ${syne.variable} h-full antialiased`}>
+//       <body className="min-h-full">{children}</body>
+//     </html>
+//   );
+// }
+
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${syne.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+    // Apply the variable and Next.js antialiasing to the HTML/Body
+    <html lang="en" className={`${inter.variable} antialiased`}>
+      <body>
+        {children}
+      </body>
     </html>
   );
 }
