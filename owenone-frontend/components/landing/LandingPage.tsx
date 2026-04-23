@@ -1,24 +1,30 @@
 import "./landing.css";
-import { BackgroundAtmosphere } from "./BackgroundAtmosphere";
-import { DebtGraphPreview } from "./DebtGraphPreview";
-import { LandingBottomGrid } from "./LandingBottomGrid";
-import { LandingFeatures } from "./LandingFeatures";
-import { LandingFooter } from "./LandingFooter";
-import { LandingHero } from "./LandingHero";
-import { LandingNav } from "./LandingNav";
+import { LandingCoreFeaturesSection } from "@/components/landing/LandingCoreFeaturesSection";
+import { LandingHeroSection } from "@/components/landing/LandingHeroSection";
+import { LandingHowSection } from "@/components/landing/LandingHowSection";
+import { LandingNavBar } from "@/components/landing/LandingNavBar";
+import { LandingProblemSection } from "@/components/landing/LandingProblemSection";
+import { LandingWaitlistSection } from "@/components/landing/LandingWaitlistSection";
+import { LandingWhySection } from "@/components/landing/LandingWhySection";
 
 export function LandingPage() {
   return (
     <div className="landing-root">
-      <BackgroundAtmosphere />
-      <LandingNav />
+      <header className="topbar">
+        <div className="landing-shell">
+        <LandingNavBar />
+        </div>
+      </header>
       <main>
-        <LandingHero />
-        <DebtGraphPreview />
-        <LandingFeatures />
-        <LandingBottomGrid />
+        <div className="landing-shell">
+        <LandingHeroSection />
+        </div>
+        <LandingProblemSection />
+        <LandingCoreFeaturesSection />
+        <LandingHowSection />
+        <LandingWhySection />
+        <LandingWaitlistSection />
       </main>
-      <LandingFooter />
     </div>
   );
 }
