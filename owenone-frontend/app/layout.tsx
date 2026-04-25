@@ -46,9 +46,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // Apply the variable and Next.js antialiasing to the HTML/Body
-    <html lang="en" className={`${inter.variable} antialiased`}>
-      <body>
+    // Some browser extensions inject attributes before React hydrates.
+    // This prevents noisy hydration warnings for those external mutations.
+    <html
+      lang="en"
+      className={`${inter.variable} antialiased`}
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
         {children}
       </body>
     </html>

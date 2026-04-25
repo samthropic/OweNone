@@ -1,4 +1,3 @@
-import "./landing.css";
 import { LandingCoreFeaturesSection } from "@/components/landing/LandingCoreFeaturesSection";
 import { LandingHeroSection } from "@/components/landing/LandingHeroSection";
 import { LandingHowSection } from "@/components/landing/LandingHowSection";
