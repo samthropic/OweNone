@@ -51,7 +51,7 @@ go run ./cmd/seed   # runs migrations, then loads demo data
 go run ./cmd/api
 ```
 
-### 4. Run the frontend
+### 4. Run the frontend 
 
 In a second terminal:
 
