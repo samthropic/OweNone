@@ -5,24 +5,29 @@ import { HomeHeader } from "@/components/home/HomeHeader";
 import { HomeRightColumn } from "@/components/home/HomeRightColumn";
 import { HomeSidebar } from "@/components/home/HomeSidebar";
 import { HomeSuggestionCard } from "@/components/home/HomeSuggestionCard";
+import type { Dashboard } from "@/lib/api-types";
 
-export function HomePage() {
+type HomePageProps = {
+  dashboard: Dashboard;
+};
+
+export function HomePage({ dashboard }: HomePageProps) {
   return (
     <div className="home-root">
-      <HomeSidebar />
+      <HomeSidebar user={dashboard.user} />
 
       <main className="home-main">
         <div className="home-main-inner">
-          <HomeHeader />
-          <HomeBalanceBanner />
-          <HomeSuggestionCard />
+          <HomeHeader dashboard={dashboard} />
+          <HomeBalanceBanner dashboard={dashboard} />
+          <HomeSuggestionCard dashboard={dashboard} />
 
           <div className="home-grid">
             <div className="home-left-column">
-              <HomeFriendsCard />
-              <HomeActivityCard />
+              <HomeFriendsCard dashboard={dashboard} />
+              <HomeActivityCard dashboard={dashboard} />
             </div>
-            <HomeRightColumn />
+            <HomeRightColumn dashboard={dashboard} />
           </div>
         </div>
       </main>

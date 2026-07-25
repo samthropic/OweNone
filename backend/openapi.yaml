@@ -1,0 +1,245 @@
+openapi: 3.1.0
+info:
+  title: OweNone API
+  version: 1.0.0
+  description: Ledger and cross-group settlement API. Money values are integer minor units.
+servers:
+  - url: http://localhost:8080
+paths:
+  /health/live:
+    get:
+      security: []
+      responses:
+        "200": { description: Process is running }
+  /health/ready:
+    get:
+      security: []
+      responses:
+        "200": { description: API and database are ready }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/v1/dashboard:
+    get:
+      summary: Return the current ledger projection and optimal settlement plan
+      responses:
+        "200":
+          description: Dashboard projection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Dashboard" }
+        "401": { $ref: "#/components/responses/Error" }
+  /api/v1/waitlist:
+    post:
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+              additionalProperties: false
+      responses:
+        "201": { description: Email added }
+        "200": { description: Email was already present }
+        "400": { $ref: "#/components/responses/Error" }
+  /api/v1/groups:
+    post:
+      summary: Create a group from existing friends
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 100 }
+                icon: { type: string }
+                memberIds:
+                  type: array
+                  items: { type: string, format: uuid }
+              additionalProperties: false
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+  /api/v1/friends:
+    post:
+      summary: Connect to an existing user by email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+              additionalProperties: false
+      responses:
+        "201": { description: Friend connected }
+        "404": { $ref: "#/components/responses/Error" }
+  /api/v1/expenses:
+    post:
+      summary: Add an expense and its complete split allocation
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateExpense" }
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/settlements:
+    post:
+      summary: Record a completed payment
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [toUserId, amountMinor, currency]
+              properties:
+                groupId: { type: [string, "null"], format: uuid }
+                toUserId: { type: string, format: uuid }
+                amountMinor: { type: integer, minimum: 1 }
+                currency: { type: string, pattern: "^[A-Z]{3}$" }
+              additionalProperties: false
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/reminders:
+    post:
+      summary: Record a reminder to a connected user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recipientId]
+              properties:
+                recipientId: { type: string, format: uuid }
+                message: { type: string, maxLength: 500 }
+              additionalProperties: false
+      responses:
+        "201": { $ref: "#/components/responses/Created" }
+        "403": { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    DevelopmentUser:
+      type: apiKey
+      in: header
+      name: X-User-ID
+      description: Development identity boundary. Replace with validated authentication in production.
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 200 }
+  responses:
+    Created:
+      description: Resource created
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+    Error:
+      description: Request failed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Money:
+      type: object
+      required: [amountMinor, currency]
+      properties:
+        amountMinor: { type: integer }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+    User:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        preferredCurrency: { type: string }
+    Dashboard:
+      type: object
+      required: [user, generatedAt, summary, friends, groups, activity, netPositions, suggestion]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        generatedAt: { type: string, format: date-time }
+        summary:
+          type: object
+          properties:
+            netBalance: { $ref: "#/components/schemas/Money" }
+            youOweTotal: { $ref: "#/components/schemas/Money" }
+            youAreOwedTotal: { $ref: "#/components/schemas/Money" }
+            activeGroups: { type: integer }
+            paymentsSaved: { type: integer }
+            nextAction: { type: [object, "null"] }
+        friends: { type: array, items: { type: object } }
+        groups: { type: array, items: { type: object } }
+        activity: { type: array, items: { type: object } }
+        netPositions: { type: array, items: { type: object } }
+        suggestion: { type: object }
+    CreateExpense:
+      type: object
+      required: [groupId, description, amountMinor, currency, split]
+      properties:
+        groupId: { type: string, format: uuid }
+        description: { type: string, maxLength: 200 }
+        category: { type: string, maxLength: 40 }
+        amountMinor: { type: integer, minimum: 1 }
+        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        paidByUserId: { type: string, format: uuid }
+        split:
+          type: object
+          required: [method]
+          properties:
+            method: { type: string, enum: [equal, exact] }
+            participantIds:
+              type: array
+              items: { type: string, format: uuid }
+            shares:
+              type: array
+              items:
+                type: object
+                required: [userId, amountMinor]
+                properties:
+                  userId: { type: string, format: uuid }
+                  amountMinor: { type: integer, minimum: 1 }
+          additionalProperties: false
+      additionalProperties: false
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+security:
+  - DevelopmentUser: []

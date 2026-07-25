@@ -1,3 +1,5 @@
+import { WaitlistForm } from "@/components/landing/WaitlistForm";
+
 export function LandingWaitlistSection() {
   return (
     <section className="landing-shell cta-section" id="waitlist">
@@ -14,18 +16,7 @@ export function LandingWaitlistSection() {
             operators who want shared finances to feel coordinated instead of
             chaotic. Join the waitlist for first access.
           </p>
-          <form className="input-row">
-            <input
-              className="input"
-              type="email"
-              placeholder="Enter your email"
-              aria-label="Email address"
-              required
-            />
-            <button type="submit" className="btn btn-dark waitlist-btn">
-              Join waitlist
-            </button>
-          </form>
+          <WaitlistForm />
         </div>
       </div>
     </section>

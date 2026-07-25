@@ -1,50 +1,56 @@
-import { groups } from "@/components/home/homeData";
+import { balanceState, formatMoney, shortName } from "@/components/home/homeData";
+import { NewGroupButton } from "@/components/home/HomeActionForms";
+import type { Dashboard, Money, User } from "@/lib/api-types";
 
-const netPositions = [
-  { name: "Jordan K.", amount: "-£12.00", tone: "is-negative" },
-  { name: "Mike K.", amount: "+£18.50", tone: "is-positive" },
-  { name: "Alex L.", amount: "+£9.00", tone: "is-positive" },
-  { name: "Sam R.", amount: "-£8.00", tone: "is-negative" },
-];
+function memberSummary(members: User[], currentUserID: string) {
+  const names = members.filter((member) => member.id !== currentUserID).map(shortName);
+  if (names.length <= 2) return names.join(", ");
+  return `${names.slice(0, 2).join(", ")} + ${names.length - 2}`;
+}
 
-const stats = [
-  { label: "Total owed", value: "£34", tone: "is-negative" },
-  { label: "You are owed", value: "£22", tone: "is-positive" },
-  { label: "Saved this month", value: "5", tone: "is-indigo" },
-  { label: "Net balance", value: "-£12", tone: "is-negative" },
-];
+function perspectiveMoney(money: Money): Money {
+  return { ...money, amountMinor: -money.amountMinor };
+}
 
-export function HomeRightColumn() {
+export function HomeRightColumn({ dashboard }: { dashboard: Dashboard }) {
+  const stats = [
+    { label: "Total owed", value: formatMoney(dashboard.summary.youOweTotal, false), tone: "is-negative" },
+    { label: "You are owed", value: formatMoney(dashboard.summary.youAreOwedTotal, false), tone: "is-positive" },
+    { label: "Payments saved", value: String(dashboard.summary.paymentsSaved), tone: "is-indigo" },
+    { label: "Net balance", value: formatMoney(dashboard.summary.netBalance), tone: dashboard.summary.netBalance.amountMinor < 0 ? "is-negative" : "is-positive" },
+  ];
+
   return (
     <div className="home-right-column">
       <section className="home-card">
         <div className="home-card-head">
           <div>
             <h3>Your groups</h3>
-            <p>3 active</p>
+            <p>{dashboard.summary.activeGroups} active</p>
           </div>
-          <button type="button" className="home-btn home-btn-small">
-            New group
-          </button>
+          <NewGroupButton dashboard={dashboard} />
         </div>
         <div className="home-list">
-          {groups.map((group) => (
+          {dashboard.groups.map((group) => {
+            const state = balanceState(group.balance.amountMinor);
+            return (
             <article key={group.id} className="home-row">
               <div className="home-icon">{group.icon}</div>
               <div className="home-row-copy">
                 <p className="home-row-title">{group.name}</p>
-                <p className="home-row-sub">{group.members}</p>
+                <p className="home-row-sub">{memberSummary(group.members, dashboard.user.id)}</p>
               </div>
               <div className="home-row-right">
                 <p
-                  className={`home-row-amount ${group.tone === "positive" ? "is-positive" : ""} ${group.tone === "negative" ? "is-negative" : ""}`}
+                  className={`home-row-amount ${group.balance.amountMinor > 0 ? "is-positive" : ""} ${group.balance.amountMinor < 0 ? "is-negative" : ""}`}
                 >
-                  {group.balance}
+                  {formatMoney(group.balance)}
                 </p>
-                <p className="home-row-sub">{group.status}</p>
+                <p className="home-row-sub">{state.direction}</p>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -56,12 +62,15 @@ export function HomeRightColumn() {
           </div>
         </div>
         <div className="home-list compact">
-          {netPositions.map((position) => (
-            <article key={position.name} className="home-compact-row">
-              <p className="home-row-title">{position.name}</p>
-              <p className={`home-row-amount ${position.tone}`}>{position.amount}</p>
+          {dashboard.netPositions.map((position) => {
+            const money = perspectiveMoney(position.balance);
+            return (
+            <article key={position.user.id} className="home-compact-row">
+              <p className="home-row-title">{shortName(position.user)}</p>
+              <p className={`home-row-amount ${money.amountMinor >= 0 ? "is-positive" : "is-negative"}`}>{formatMoney(money)}</p>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
 

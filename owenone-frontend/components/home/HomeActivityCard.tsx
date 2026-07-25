@@ -1,6 +1,7 @@
-import { activity } from "@/components/home/homeData";
+import { categoryIcon, formatMoney, relativeTime, shortName } from "@/components/home/homeData";
+import type { Dashboard } from "@/lib/api-types";
 
-export function HomeActivityCard() {
+export function HomeActivityCard({ dashboard }: { dashboard: Dashboard }) {
   return (
     <section className="home-card">
       <div className="home-card-head">
@@ -13,20 +14,25 @@ export function HomeActivityCard() {
         </button>
       </div>
       <div className="home-list">
-        {activity.map((item) => (
+        {dashboard.activity.map((item) => (
           <article key={item.id} className="home-row">
-            <div className="home-icon">{item.icon}</div>
+            <div className="home-icon">{categoryIcon(item.category, item.kind)}</div>
             <div className="home-row-copy">
-              <p className="home-row-title">{item.title}</p>
-              <p className="home-row-sub">{item.meta}</p>
+              <p className="home-row-title">
+                {item.actor.id === dashboard.user.id ? "You" : shortName(item.actor)} {item.kind === "expense" ? "added" : "settled"} &quot;{item.description}&quot;
+              </p>
+              <p className="home-row-sub">
+                {item.kind === "expense" ? `${item.splitMethod === "equal" ? "Split equally" : "Exact split"}, ${item.peopleCount} people` : "Marked paid"}
+                {item.groupName ? `, ${item.groupName}` : ""}
+              </p>
             </div>
             <div className="home-row-right">
               <p
-                className={`home-row-amount ${item.amountTone === "positive" ? "is-positive" : "is-negative"}`}
+                className={`home-row-amount ${item.impact.amountMinor >= 0 ? "is-positive" : "is-negative"}`}
               >
-                {item.amount}
+                {formatMoney(item.impact)}
               </p>
-              <p className="home-row-sub">{item.time}</p>
+              <p className="home-row-sub">{relativeTime(item.occurredAt, Date.parse(dashboard.generatedAt))}</p>
             </div>
           </article>
         ))}

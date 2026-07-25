@@ -1,6 +1,8 @@
-import { friends } from "@/components/home/homeData";
+import { balanceState, formatMoney, initials, shortName } from "@/components/home/homeData";
+import { AddFriendButton, FriendActionButton } from "@/components/home/HomeActionForms";
+import type { Dashboard } from "@/lib/api-types";
 
-export function HomeFriendsCard() {
+export function HomeFriendsCard({ dashboard }: { dashboard: Dashboard }) {
   return (
     <section className="home-card">
       <div className="home-card-head">
@@ -8,29 +10,28 @@ export function HomeFriendsCard() {
           <h3>Friends</h3>
           <p>Balances across all shared groups</p>
         </div>
-        <button type="button" className="home-btn home-btn-small">
-          Add friend
-        </button>
+        <AddFriendButton />
       </div>
       <div className="home-list">
-        {friends.map((friend) => (
-          <article key={friend.id} className="home-row">
-            <div className={`home-avatar tone-${friend.tone}`}>{friend.initials}</div>
+        {dashboard.friends.map((friend) => {
+          const state = balanceState(friend.balance.amountMinor);
+          return (
+          <article key={friend.user.id} className="home-row">
+            <div className={`home-avatar tone-${state.tone}`}>{initials(friend.user)}</div>
             <div className="home-row-copy">
-              <p className="home-row-title">{friend.name}</p>
-              <p className="home-row-sub">{friend.context}</p>
+              <p className="home-row-title">{shortName(friend.user)}</p>
+              <p className="home-row-sub">{friend.groupNames.join(", ") || "No shared groups"}</p>
             </div>
             <div className="home-row-right">
-              <p className="home-row-amount">{friend.amount}</p>
-              <p className="home-row-sub">{friend.direction}</p>
-              {friend.cta ? (
-                <button type="button" className="home-pill-btn">
-                  {friend.cta}
-                </button>
+              <p className="home-row-amount">{formatMoney(friend.balance)}</p>
+              <p className="home-row-sub">{state.direction}</p>
+              {friend.balance.amountMinor !== 0 ? (
+                <FriendActionButton friend={friend} />
               ) : null}
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

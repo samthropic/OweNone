@@ -1,18 +1,15 @@
-export function HomeHeader() {
+import { dashboardDate } from "@/components/home/homeData";
+import { HeaderActions } from "@/components/home/HomeActionForms";
+import type { Dashboard } from "@/lib/api-types";
+
+export function HomeHeader({ dashboard }: { dashboard: Dashboard }) {
   return (
     <header className="home-header">
       <div>
         <h1>Overview</h1>
-        <p>Saturday, 25 April 2026</p>
+        <p>{dashboardDate(dashboard)}</p>
       </div>
-      <div className="home-header-actions">
-        <button type="button" className="home-btn">
-          Add expense
-        </button>
-        <button type="button" className="home-btn home-btn-primary">
-          Pay someone
-        </button>
-      </div>
+      <HeaderActions dashboard={dashboard} />
     </header>
   );
 }

@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { initials } from "@/components/home/homeData";
+import type { User } from "@/lib/api-types";
 
 const menuItems = ["Overview", "Friends", "Groups", "Activity", "Settle Up"];
 
-export function HomeSidebar() {
+export function HomeSidebar({ user }: { user: User }) {
   return (
     <aside className="home-sidebar">
       <Link href="/landing" className="home-brand">
@@ -27,10 +29,10 @@ export function HomeSidebar() {
       </nav>
 
       <div className="home-sidebar-user">
-        <div className="home-avatar tone-indigo">SJ</div>
+        <div className="home-avatar tone-indigo">{initials(user)}</div>
         <div>
-          <p className="home-user-name">Sarah J.</p>
-          <p className="home-user-email">sarah@example.com</p>
+          <p className="home-user-name">{user.displayName}</p>
+          <p className="home-user-email">{user.email}</p>
         </div>
       </div>
     </aside>

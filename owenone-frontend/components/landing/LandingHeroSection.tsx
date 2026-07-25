@@ -15,7 +15,7 @@ export function LandingHeroSection() {
       <div className="hero-grid item-stretch">
         <div>
           <h1 className="font-bold tracking-tight text-slate-800">
-            Drowning in group IOU's?
+            Drowning in group IOU&apos;s?
             <br />
             <span className="text-slate-400">We untangle the mess.</span>
           </h1>

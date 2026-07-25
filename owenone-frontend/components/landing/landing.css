@@ -759,6 +759,25 @@
   padding-right: 26px;
 }
 
+.waitlist-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.waitlist-status {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 13px;
+}
+
+.waitlist-status.is-success {
+  color: #047857;
+}
+
+.waitlist-status.is-error {
+  color: #be123c;
+}
+
 @media (max-width: 1080px) {
   .hero-grid,
   .problem-grid,

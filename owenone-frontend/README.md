@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OweNone frontend
 
-## Getting Started
+Next.js 16 frontend for OweNone. The home page is backed by the Go API; it is
+not a standalone static page.
 
-First, run the development server:
+## Requirements
+
+- Node.js 24 LTS (the version is pinned in `.nvmrc`)
+- npm
+- The OweNone API running locally on port 8080, backed by PostgreSQL 17
+
+Node 23 is end-of-life and is not supported for this project. With `nvm`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+nvm install
+nvm use
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start and seed the backend first:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+cd ../backend
+export DATABASE_URL='postgres://owenone:owenone@localhost:5432/owenone?sslmode=disable'
+go run ./cmd/seed   # first run only
+go run ./cmd/api
+```
 
-## Learn More
+Verify it is up:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+curl --fail http://localhost:8080/health/ready
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Then start the frontend in a second terminal:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+cd owenone-frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000). If the API is not running,
+the `/` route fails because it loads `/api/v1/dashboard` during server rendering.
+The `/landing` route does not require the API.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Resource troubleshooting
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js compilation adds several hundred megabytes of resident memory. On a
+16 GB Mac that is already swapping, this can make the whole system appear to
+freeze even when Next itself is healthy. Before starting it:
+
+```bash
+sysctl vm.swapusage
+ps -axo pid,rss,command -r | head
+```
+
+Close memory-heavy browser tabs or editor windows when swap use is already
+high. If the Turbopack cache becomes unusually large or behaves as if stale,
+stop Next and remove `.next`; it is generated output and will be recreated.
+
+## Configuration
+
+`OWENONE_API_URL` defaults to `http://localhost:8080`. `OWENONE_USER_ID`
+defaults to the seeded demo user. See `.env.example`.
+
+## Validation
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
