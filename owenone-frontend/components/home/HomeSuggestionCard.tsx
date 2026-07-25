@@ -1,29 +1,36 @@
-export function HomeSuggestionCard() {
+import { formatMoney } from "@/components/home/homeData";
+import { SettlementButton } from "@/components/home/HomeActionForms";
+import type { Dashboard } from "@/lib/api-types";
+
+export function HomeSuggestionCard({ dashboard }: { dashboard: Dashboard }) {
+  const { suggestion } = dashboard;
+  const groupNames = suggestion.groups.map((group) => group.name);
+  const nextPayment = suggestion.transfers.find((transfer) => transfer.from.id === dashboard.user.id);
+
   return (
     <section className="home-suggestion-card">
       <p className="home-kicker home-kicker-dark">Graph compression active</p>
       <h2>OweNone found a shortcut.</h2>
       <p>
-        6 scattered IOUs across Holiday, Flatmates, and Dinners collapse into 1
-        transfer.
+        {suggestion.originalPaymentCount} scattered IOUs across {groupNames.join(", ") || "your network"} collapse into {suggestion.reducedPaymentCount} {suggestion.reducedPaymentCount === 1 ? "transfer" : "transfers"}.
       </p>
       <div className="home-suggestion-stats">
         <div>
-          <strong>6 → 1</strong>
+          <strong>{suggestion.originalPaymentCount} → {suggestion.reducedPaymentCount}</strong>
           <span>payments reduced</span>
         </div>
         <div>
-          <strong>£22</strong>
+          <strong>{formatMoney(suggestion.offsettingDebt, false)}</strong>
           <span>offsetting debt cancelled</span>
         </div>
         <div>
-          <strong>3</strong>
+          <strong>{suggestion.groups.length}</strong>
           <span>groups compressed</span>
         </div>
       </div>
-      <button type="button" className="home-btn home-btn-primary">
-        Accept & Pay
-      </button>
+      {nextPayment ? (
+        <SettlementButton transfer={nextPayment} label="Accept & Pay" className="home-btn home-btn-primary" />
+      ) : null}
     </section>
   );
 }

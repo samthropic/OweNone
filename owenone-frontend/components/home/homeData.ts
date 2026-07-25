@@ -1,144 +1,59 @@
+import type { Dashboard, Money, User } from "@/lib/api-types";
+
 export type Tone = "rose" | "green" | "sky" | "amber" | "neutral";
 
-export type Friend = {
-  id: string;
-  name: string;
-  initials: string;
-  context: string;
-  amount: string;
-  direction: string;
-  tone: Tone;
-  cta?: string;
-};
+export function formatMoney(money: Money, signed = true) {
+  const formatter = new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: money.currency,
+  });
+  const absolute = formatter.format(Math.abs(money.amountMinor) / 100);
+  if (!signed || money.amountMinor === 0) return absolute;
+  return `${money.amountMinor > 0 ? "+" : "-"}${absolute}`;
+}
 
-export type ActivityItem = {
-  id: string;
-  icon: string;
-  title: string;
-  meta: string;
-  amount: string;
-  amountTone: "positive" | "negative";
-  time: string;
-};
+export function shortName(user: User) {
+  const parts = user.displayName.trim().split(/\s+/);
+  return parts.length > 1
+    ? `${parts[0]} ${parts.at(-1)?.slice(0, 1)}.`
+    : parts[0];
+}
 
-export type GroupItem = {
-  id: string;
-  icon: string;
-  name: string;
-  members: string;
-  balance: string;
-  tone: "positive" | "negative" | "neutral";
-  status: string;
-};
+export function initials(user: User) {
+  return user.displayName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
 
-export const friends: Friend[] = [
-  {
-    id: "jordan",
-    name: "Jordan K.",
-    initials: "JK",
-    context: "Holiday '24, Flatmates, Dinners",
-    amount: "-£12.00",
-    direction: "You owe",
-    tone: "rose",
-    cta: "Pay",
-  },
-  {
-    id: "mike",
-    name: "Mike K.",
-    initials: "MK",
-    context: "Flatmates, Groceries",
-    amount: "+£18.50",
-    direction: "Owes you",
-    tone: "green",
-    cta: "Remind",
-  },
-  {
-    id: "alex",
-    name: "Alex L.",
-    initials: "AL",
-    context: "Holiday '24, Dinners",
-    amount: "+£9.00",
-    direction: "Owes you",
-    tone: "sky",
-    cta: "Remind",
-  },
-  {
-    id: "sam",
-    name: "Sam R.",
-    initials: "SR",
-    context: "Flatmates",
-    amount: "-£8.00",
-    direction: "You owe",
-    tone: "amber",
-    cta: "Pay",
-  },
-  {
-    id: "priya",
-    name: "Priya R.",
-    initials: "PR",
-    context: "Dinners, all settled",
-    amount: "£0.00",
-    direction: "Settled",
-    tone: "neutral",
-  },
-];
+export function relativeTime(value: string, now = Date.now()) {
+  const elapsedSeconds = Math.max(0, Math.floor((now - Date.parse(value)) / 1000));
+  if (elapsedSeconds < 60) return "Just now";
+  if (elapsedSeconds < 3600) return `${Math.floor(elapsedSeconds / 60)}m ago`;
+  if (elapsedSeconds < 86400) return `${Math.floor(elapsedSeconds / 3600)}h ago`;
+  const days = Math.floor(elapsedSeconds / 86400);
+  return days === 1 ? "Yesterday" : `${days} days ago`;
+}
 
-export const activity: ActivityItem[] = [
-  {
-    id: "pizza",
-    icon: "🍕",
-    title: "Jordan added \"Pizza night - Soho\"",
-    meta: "Split equally, 4 people, Holiday '24",
-    amount: "-£14.25",
-    amountTone: "negative",
-    time: "2h ago",
-  },
-  {
-    id: "rent",
-    icon: "💸",
-    title: "Mike settled \"Monthly rent\"",
-    meta: "Marked paid, Flatmates",
-    amount: "+£18.50",
-    amountTone: "positive",
-    time: "Yesterday",
-  },
-  {
-    id: "train",
-    icon: "✈",
-    title: "You added \"Train tickets - Edinburgh\"",
-    meta: "Split equally, 3 people, Holiday '24",
-    amount: "-£42.00",
-    amountTone: "negative",
-    time: "2 days ago",
-  },
-];
+export function balanceState(amountMinor: number) {
+  if (amountMinor > 0) return { direction: "Owes you", tone: "green" as const };
+  if (amountMinor < 0) return { direction: "You owe", tone: "rose" as const };
+  return { direction: "Settled", tone: "neutral" as const };
+}
 
-export const groups: GroupItem[] = [
-  {
-    id: "holiday",
-    icon: "✈",
-    name: "Holiday '24",
-    members: "Jordan, Alex + 2",
-    balance: "-£18",
-    tone: "negative",
-    status: "You owe",
-  },
-  {
-    id: "flatmates",
-    icon: "🏠",
-    name: "Flatmates",
-    members: "Mike, Sam + 1",
-    balance: "+£10.50",
-    tone: "positive",
-    status: "Owed to you",
-  },
-  {
-    id: "dinners",
-    icon: "🍽",
-    name: "Dinners",
-    members: "Alex, Priya, Jordan",
-    balance: "£0",
-    tone: "neutral",
-    status: "Settled",
-  },
-];
+export function categoryIcon(category = "general", kind = "expense") {
+  if (kind === "settlement") return "✓";
+  return ({ food: "🍕", travel: "✈️", home: "🏠" } as Record<string, string>)[category] ?? "🧾";
+}
+
+export function dashboardDate(dashboard: Dashboard) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(dashboard.generatedAt));
+}
