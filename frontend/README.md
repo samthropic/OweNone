@@ -36,7 +36,7 @@ curl --fail http://localhost:8080/health/ready
 Then start the frontend in a second terminal:
 
 ```bash
-cd owenone-frontend
+cd frontend
 cp .env.example .env.local
 npm install
 npm run dev

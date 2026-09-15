@@ -14,7 +14,7 @@ OweNone transforms fragmented group expenses into the minimum number of payments
 ```text
 /
 	backend/            Go API, PostgreSQL migrations, and settlement engine
-	owenone-frontend/   Next.js 16 application
+	frontend/   Next.js 16 application
 ```
 
 ## Quick Start
@@ -23,7 +23,7 @@ Requirements:
 
 - PostgreSQL 17
 - Go 1.25 or newer
-- Node.js 24 LTS (see `owenone-frontend/.nvmrc`)
+- Node.js 24 LTS (see `frontend/.nvmrc`)
 
 ### 1. Start PostgreSQL
 
@@ -56,8 +56,8 @@ go run ./cmd/api
 In a second terminal:
 
 ```bash
-cp owenone-frontend/.env.example owenone-frontend/.env.local
-cd owenone-frontend
+cp frontend/.env.example frontend/.env.local
+cd frontend
 nvm use
 npm install
 npm run dev
@@ -73,5 +73,5 @@ On later sessions PostgreSQL is already running, so only steps 3 and 4 are neede
 
 ```bash
 cd backend && go test ./... && go vet ./...
-cd ../owenone-frontend && npm run build
+cd ../frontend && npm run build
 ```
