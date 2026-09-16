@@ -56,10 +56,6 @@ export function LoginForm() {
 
       <hr className="auth-divider" />
 
-      <p className="auth-demo-hint">
-        Demo account: <code>sarah@example.com</code> / <code>password123</code>
-      </p>
-
       <p className="auth-footer">
         New to OweNone?{" "}
         <Link href="/signup">Create an account</Link>

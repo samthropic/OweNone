@@ -176,22 +176,3 @@
   border-top: 1px solid var(--line);
   margin: 4px 0 14px;
 }
-
-.auth-demo-hint {
-  font-size: 12px;
-  color: var(--mist);
-  text-align: center;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: rgba(15, 110, 99, 0.05);
-  line-height: 1.6;
-}
-
-.auth-demo-hint code {
-  font-family: var(--font-mono), "JetBrains Mono", monospace;
-  font-size: 11px;
-  background: rgba(22, 50, 63, 0.06);
-  padding: 2px 5px;
-  border-radius: 6px;
-}

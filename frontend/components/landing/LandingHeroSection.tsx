@@ -31,6 +31,7 @@ export function LandingHeroSection() {
   return (
     <section className="hero">
       <div className="hero-copy">
+        <p className="hero-brand">OweNone</p>
         <h1 className="hero-title">
           Drowning in group IOUs?{" "}
           <em>Let the tide go out.</em>
