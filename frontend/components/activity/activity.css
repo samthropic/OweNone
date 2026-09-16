@@ -1,0 +1,139 @@
+/* Activity page — Harbor */
+
+.activity-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.activity-page-head h1 {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.activity-page-head > div > p {
+  font-size: 14px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.activity-head-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.activity-no-groups-hint {
+  font-size: 12px;
+  color: var(--mist);
+  text-align: right;
+  max-width: 200px;
+  line-height: 1.5;
+}
+
+.activity-link {
+  color: var(--tide);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.activity-link:hover {
+  text-decoration: underline;
+}
+
+.activity-link:focus-visible {
+  outline: 2px solid var(--tide);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.activity-feed {
+  display: grid;
+  gap: 24px;
+}
+
+.activity-day-group {
+  display: grid;
+  gap: 8px;
+}
+
+.activity-day-heading {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tide);
+  font-weight: 700;
+  padding: 0 2px;
+}
+
+.activity-load-more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 16px;
+  min-height: 20px;
+}
+
+.activity-status-region {
+  min-height: 20px;
+  margin-top: 8px;
+}
+
+.activity-empty {
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--shell);
+  box-shadow: 0 14px 40px rgba(22, 50, 63, 0.05);
+  padding: 52px 36px;
+  text-align: center;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.activity-empty-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.activity-empty-sub {
+  font-size: 14px;
+  color: var(--mist);
+  margin-bottom: 14px;
+  max-width: 340px;
+  line-height: 1.55;
+}
+
+.activity-empty-cta {
+  text-decoration: none;
+  display: inline-block;
+}
+
+@media (max-width: 740px) {
+  .activity-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .activity-head-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .activity-no-groups-hint {
+    text-align: left;
+    max-width: none;
+  }
+
+  .activity-empty {
+    padding: 44px 24px;
+  }
+}

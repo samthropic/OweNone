@@ -3,17 +3,46 @@ export type Money = {
   currency: string;
 };
 
+export type PaymentApps = {
+  venmo?: string;
+  paypal?: string;
+  cashApp?: string;
+  zelle?: string;
+};
+
 export type User = {
   id: string;
   email?: string;
   displayName: string;
   preferredCurrency?: string;
+  avatarUrl?: string;
+  paymentApps?: PaymentApps;
 };
 
 export type NamedTransfer = {
   from: User;
   to: User;
   money: Money;
+};
+
+export type ActivityItem = {
+  id: string;
+  kind: "expense" | "settlement";
+  description: string;
+  category?: string;
+  groupId?: string;
+  groupName?: string;
+  actor: User;
+  splitMethod?: string;
+  peopleCount?: number;
+  impact: Money;
+  occurredAt: string;
+};
+
+export type ActivityFeed = {
+  activity: ActivityItem[];
+  total: number;
+  hasMore: boolean;
 };
 
 export type Dashboard = {
@@ -31,6 +60,7 @@ export type Dashboard = {
     user: User;
     groupNames: string[];
     balance: Money;
+    isFriend: boolean;
   }>;
   groups: Array<{
     id: string;
@@ -38,19 +68,9 @@ export type Dashboard = {
     icon: string;
     members: User[];
     balance: Money;
+    isOwner: boolean;
   }>;
-  activity: Array<{
-    id: string;
-    kind: "expense" | "settlement";
-    description: string;
-    category?: string;
-    groupName?: string;
-    actor: User;
-    splitMethod?: string;
-    peopleCount?: number;
-    impact: Money;
-    occurredAt: string;
-  }>;
+  activity: ActivityItem[];
   netPositions: Array<{
     user: User;
     balance: Money;
@@ -71,4 +91,19 @@ export type APIError = {
     code?: string;
     message?: string;
   };
+};
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  preferredCurrency: string;
+  avatarUrl?: string;
+  paymentApps?: PaymentApps;
+};
+
+export type AuthToken = {
+  token: string;
+  expiresAt: string;
+  user: AuthUser;
 };

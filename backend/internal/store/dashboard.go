@@ -31,20 +31,27 @@ func (store *Store) LoadLedgerSnapshot(ctx context.Context, userID string) (doma
 
 func (store *Store) loadCurrentUser(ctx context.Context, userID string) (domain.User, error) {
 	var user domain.User
+	var venmo, paypal, cashapp, zelle, avatarURL string
 	err := store.pool.QueryRow(ctx, `
-		SELECT id::text, email, display_name, preferred_currency
+		SELECT id::text, email, display_name, preferred_currency, `+userAvatarColumn+`, `+userPaymentColumns+`
 		FROM users
 		WHERE id = $1::uuid`, userID,
-	).Scan(&user.ID, &user.Email, &user.DisplayName, &user.PreferredCurrency)
+	).Scan(&user.ID, &user.Email, &user.DisplayName, &user.PreferredCurrency, &avatarURL, &venmo, &paypal, &cashapp, &zelle)
 	if err != nil {
 		return domain.User{}, fmt.Errorf("load current user: %w", mapNotFound(err))
 	}
+	applyAvatar(&user, avatarURL)
+	user.PaymentApps = paymentAppsFromScan(venmo, paypal, cashapp, zelle)
 	return user, nil
 }
 
 func (store *Store) loadGroups(ctx context.Context, userID string) ([]domain.Group, error) {
 	rows, err := store.pool.Query(ctx, `
-		SELECT g.id::text, g.name, g.icon, g.created_at, member.id::text, member.display_name
+		SELECT g.id::text, g.name, g.icon, g.created_at, g.created_by::text,
+			member.id::text, member.display_name, member.email,
+			COALESCE(member.avatar_url, ''),
+			COALESCE(member.venmo_handle, ''), COALESCE(member.paypal_handle, ''),
+			COALESCE(member.cashapp_handle, ''), COALESCE(member.zelle_handle, '')
 		FROM groups g
 		JOIN group_members current_membership ON current_membership.group_id = g.id
 		JOIN group_members membership ON membership.group_id = g.id
@@ -61,9 +68,16 @@ func (store *Store) loadGroups(ctx context.Context, userID string) ([]domain.Gro
 	for rows.Next() {
 		var group domain.Group
 		var member domain.User
-		if err := rows.Scan(&group.ID, &group.Name, &group.Icon, &group.CreatedAt, &member.ID, &member.DisplayName); err != nil {
+		var venmo, paypal, cashapp, zelle, avatarURL string
+		if err := rows.Scan(
+			&group.ID, &group.Name, &group.Icon, &group.CreatedAt, &group.OwnerID,
+			&member.ID, &member.DisplayName, &member.Email, &avatarURL,
+			&venmo, &paypal, &cashapp, &zelle,
+		); err != nil {
 			return nil, fmt.Errorf("scan group: %w", err)
 		}
+		applyAvatar(&member, avatarURL)
+		member.PaymentApps = paymentAppsFromScan(venmo, paypal, cashapp, zelle)
 		index, exists := groupIndexes[group.ID]
 		if !exists {
 			index = len(groups)
@@ -80,7 +94,10 @@ func (store *Store) loadGroups(ctx context.Context, userID string) ([]domain.Gro
 
 func (store *Store) loadFriends(ctx context.Context, userID string) ([]domain.User, error) {
 	rows, err := store.pool.Query(ctx, `
-		SELECT friend.id::text, friend.display_name
+		SELECT friend.id::text, friend.display_name, friend.email,
+			COALESCE(friend.avatar_url, ''),
+			COALESCE(friend.venmo_handle, ''), COALESCE(friend.paypal_handle, ''),
+			COALESCE(friend.cashapp_handle, ''), COALESCE(friend.zelle_handle, '')
 		FROM friendships friendship
 		JOIN users friend ON friend.id = CASE
 			WHEN friendship.user_id = $1::uuid THEN friendship.friend_id
@@ -96,9 +113,12 @@ func (store *Store) loadFriends(ctx context.Context, userID string) ([]domain.Us
 	friends := make([]domain.User, 0)
 	for rows.Next() {
 		var friend domain.User
-		if err := rows.Scan(&friend.ID, &friend.DisplayName); err != nil {
+		var venmo, paypal, cashapp, zelle, avatarURL string
+		if err := rows.Scan(&friend.ID, &friend.DisplayName, &friend.Email, &avatarURL, &venmo, &paypal, &cashapp, &zelle); err != nil {
 			return nil, fmt.Errorf("scan friend: %w", err)
 		}
+		applyAvatar(&friend, avatarURL)
+		friend.PaymentApps = paymentAppsFromScan(venmo, paypal, cashapp, zelle)
 		friends = append(friends, friend)
 	}
 	if err := rows.Err(); err != nil {
@@ -157,7 +177,8 @@ func (store *Store) loadSettlements(ctx context.Context, userID, currency string
 			WHERE current_membership.user_id = $1::uuid
 		)
 		SELECT settlement.id::text, settlement.group_id::text, settlement.from_user_id::text,
-			settlement.to_user_id::text, settlement.amount_minor, settlement.currency, settlement.created_at
+			settlement.to_user_id::text, settlement.amount_minor, settlement.currency,
+			settlement.payment_method, settlement.created_at
 		FROM settlements settlement
 		WHERE settlement.status = 'completed' AND settlement.currency = $2
 		AND (
@@ -183,7 +204,8 @@ func (store *Store) loadSettlements(ctx context.Context, userID, currency string
 		var settlement domain.Settlement
 		if err := rows.Scan(
 			&settlement.ID, &settlement.GroupID, &settlement.FromUserID, &settlement.ToUserID,
-			&settlement.Money.AmountMinor, &settlement.Money.Currency, &settlement.CreatedAt,
+			&settlement.Money.AmountMinor, &settlement.Money.Currency, &settlement.PaymentMethod,
+			&settlement.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan settlement: %w", err)
 		}

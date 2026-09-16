@@ -4,17 +4,16 @@ export function LandingCoreFeaturesSection() {
   return (
     <section className="landing-shell block" id="features">
       <div className="features-head">
-        <div className="section-kicker">Core product</div>
+        <p className="section-kicker">What it does</p>
         <h2 className="section-title">
-          Built like infrastructure, surfaced like a luxury consumer product.
+          One net position per relationship — across every group you share.
         </h2>
       </div>
-      <div className="cards-4">
+      <div className="feature-strip">
         {CORE_FEATURES.map((feature) => (
-          <article key={feature.title} className="card">
-            <div className="icon-chip">✦</div>
-            <h3 className="card-title">{feature.title}</h3>
-            <p className="card-text">{feature.description}</p>
+          <article key={feature.title}>
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
           </article>
         ))}
       </div>

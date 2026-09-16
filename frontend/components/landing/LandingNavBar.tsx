@@ -1,15 +1,22 @@
 import Link from "next/link";
+import Image from "next/image";
+import { UserAvatar } from "@/components/home/UserAvatar";
+import type { AuthUser } from "@/lib/api-types";
 import { LANDING_NAV_ITEMS } from "./landingData";
 
-export function LandingNavBar() {
+export function LandingNavBar({ user }: { user: AuthUser | null }) {
   return (
     <nav className="landing-nav" aria-label="Primary">
-      <Link href="/" className="brand">
-        <span className="brand-mark">∞</span>
-        <span className="brand-copy">
-          <strong>OweNone</strong>
-          <small>Luxury infrastructure for shared money</small>
-        </span>
+      <Link href="/landing" className="brand">
+        <Image
+          src="/owenone-mark.png"
+          alt=""
+          width={256}
+          height={259}
+          className="brand-mark"
+          preload={true}
+        />
+        <span className="brand-copy">OweNone</span>
       </Link>
       <div className="nav-links">
         {LANDING_NAV_ITEMS.map((item) => (
@@ -18,9 +25,26 @@ export function LandingNavBar() {
           </a>
         ))}
       </div>
-      <a href="#waitlist" className="request-btn">
-        Request access
-      </a>
+      <div className="nav-actions">
+        {user ? (
+          <Link
+            href="/"
+            className="nav-user"
+            aria-label={`Open your dashboard, signed in as ${user.displayName}`}
+          >
+            <UserAvatar user={user} className="nav-user-avatar" />
+          </Link>
+        ) : (
+          <>
+            <Link href="/login" className="nav-login">
+              Log in
+            </Link>
+            <Link href="/signup" className="btn btn-primary">
+              Sign up
+            </Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }

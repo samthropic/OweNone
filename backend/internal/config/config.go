@@ -11,6 +11,7 @@ type Config struct {
 	Address          string
 	DatabaseURL      string
 	FrontendOrigin   string
+	AvatarDir        string
 	MaxDBConnections int32
 	AutoMigrate      bool
 	ShutdownTimeout  time.Duration
@@ -21,6 +22,7 @@ func Load() (Config, error) {
 		Address:          envOrDefault("HTTP_ADDRESS", ":8080"),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		FrontendOrigin:   envOrDefault("FRONTEND_ORIGIN", "http://localhost:3000"),
+		AvatarDir:        envOrDefault("AVATAR_DIR", "data/avatars"),
 		MaxDBConnections: 10,
 		AutoMigrate:      true,
 		ShutdownTimeout:  10 * time.Second,

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { categoryIcon, formatMoney, relativeTime, shortName } from "@/components/home/homeData";
 import type { Dashboard } from "@/lib/api-types";
 
@@ -9,9 +10,7 @@ export function HomeActivityCard({ dashboard }: { dashboard: Dashboard }) {
           <h3>Recent activity</h3>
           <p>Last 7 days</p>
         </div>
-        <button type="button" className="home-btn home-btn-small">
-          View all
-        </button>
+        <Link href="/activity" className="home-btn home-btn-small">View all</Link>
       </div>
       <div className="home-list">
         {dashboard.activity.map((item) => (

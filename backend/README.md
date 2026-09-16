@@ -35,11 +35,19 @@ go run ./cmd/api
 
 The API is then available at `http://localhost:8080`. Migrations run automatically at API startup and are serialized with a PostgreSQL advisory lock. `cmd/seed` also applies migrations before loading demo data, so it is safe to run first on an empty database.
 
-The seeded dashboard user ID is `10000000-0000-0000-0000-000000000001`. The demo ledger contains six obligations across three groups that compress to one £12 payment, cancelling £22 of offsetting debt.
+The seeded demo user is **sarah@example.com** with password **password123**. The demo ledger spans several months of expenses across a handful of groups, with dozens of activities, varied balances (some owed to you, some you owe, some already settled), and a debt graph that visibly compresses into a smaller set of transfers. All demo data is denominated in **USD**. `go run ./cmd/seed` is idempotent — re-running it on an already-seeded database is safe.
 
-## Development Identity
+New accounts created via `POST /api/v1/auth/signup` also default to **USD** as their preferred currency. The dashboard reconciles one currency at a time — the signed-in user's preferred currency — so a user whose preferred currency has no associated expenses will see an empty ledger. If you sign up and the dashboard shows nothing, verify that your preferred currency matches the currency of your group's expenses (update it via `POST /api/v1/profile`).
 
-Authenticated development endpoints require `X-User-ID`. The Next.js server supplies this header from `OWENONE_USER_ID`, so it is not controlled by browser input. This boundary is intentionally replaceable: production must validate a real session or access token and derive the user ID from its subject rather than accept this header from public clients.
+## Authentication
+
+User accounts are created via `POST /api/v1/auth/signup` and authenticated via `POST /api/v1/auth/login`. Both endpoints return an opaque session token and the authenticated user record. All other API endpoints (except `/health/*`) require `Authorization: Bearer <token>`.
+
+**Password hashing**: passwords are hashed with PBKDF2-HMAC-SHA256 (`crypto/pbkdf2`, ~210 000 iterations, 16-byte random salt). The stored value has the form `pbkdf2_sha256$<iterations>$<salt>$<key>`. No third-party crypto library is used.
+
+**Sessions**: the raw session token is returned once at signup/login. Only its SHA-256 hash is persisted in a `sessions` table with a 30-day `expires_at`. The Next.js server stores the token in an `httpOnly`, `SameSite=Lax` cookie named `owenone_session` (flagged `Secure` in production), so it is never exposed to client JavaScript.
+
+Session lifetime is 30 days from issuance. Production deployments would additionally need token rotation, per-IP rate limiting on login, email verification, and CSRF protection for browser clients.
 
 Financial `POST` requests also require `Idempotency-Key`. Reusing a key with the same payload returns the original resource; reusing it with a different payload returns `409 Conflict`.
 

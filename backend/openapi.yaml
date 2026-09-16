@@ -31,23 +31,125 @@ paths:
                 properties:
                   data: { $ref: "#/components/schemas/Dashboard" }
         "401": { $ref: "#/components/responses/Error" }
-  /api/v1/waitlist:
+  /api/v1/activity:
+    get:
+      summary: Return a paginated list of all activity for the signed-in user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum items to return. Default 50, maximum 200. Values above 200 are clamped to 200. Non-integer values are rejected with 400.
+          schema: { type: integer, default: 50, minimum: 1, maximum: 200 }
+        - name: offset
+          in: query
+          description: Zero-based index of the first item to return. Default 0. Non-integer values are rejected with 400.
+          schema: { type: integer, default: 0, minimum: 0 }
+        - name: kind
+          in: query
+          description: Filter by activity kind. Omit or leave empty to return all activities. Any value other than "expense" or "settlement" is rejected with 400.
+          schema: { type: string, enum: [expense, settlement] }
+        - name: groupId
+          in: query
+          description: Filter to a specific group by UUID. Omit or leave empty to return activities across all groups. A malformed (non-UUID) value is rejected with 400. A valid UUID for a group the user does not belong to returns an empty list.
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Paginated activity feed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/ActivityFeed" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+  /api/v1/auth/signup:
     post:
       security: []
+      summary: Create a new user account and return a session token. The new account's preferred currency defaults to USD.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [email]
+              required: [email, displayName, password]
               properties:
                 email: { type: string, format: email }
+                displayName: { type: string }
+                password: { type: string }
               additionalProperties: false
       responses:
-        "201": { description: Email added }
-        "200": { description: Email was already present }
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/AuthTokenData" }
         "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/auth/login:
+    post:
+      security: []
+      summary: Authenticate with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+              additionalProperties: false
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/AuthTokenData" }
+        "401": { $ref: "#/components/responses/Error" }
+  /api/v1/auth/logout:
+    post:
+      summary: Invalidate the current session
+      responses:
+        "200":
+          description: Session invalidated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      loggedOut: { type: boolean }
+        "401": { $ref: "#/components/responses/Error" }
+  /api/v1/auth/session:
+    get:
+      summary: Return the current session user
+      responses:
+        "200":
+          description: Active session
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/AuthSessionData" }
+        "401": { $ref: "#/components/responses/Error" }
   /api/v1/groups:
     post:
       summary: Create a group from existing friends
@@ -69,6 +171,74 @@ paths:
         "201": { $ref: "#/components/responses/Created" }
         "400": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
+  /api/v1/groups/update:
+    post:
+      summary: Update a group's name, icon, and member list (owner only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [groupId, name, icon, memberIds]
+              properties:
+                groupId: { type: string, format: uuid }
+                name: { type: string, minLength: 1, maxLength: 100 }
+                icon: { type: string, minLength: 1, maxLength: 16 }
+                memberIds:
+                  type: array
+                  items: { type: string, format: uuid }
+                  description: Complete desired member list excluding the owner
+              additionalProperties: false
+      responses:
+        "200":
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [group]
+                    properties:
+                      group: { $ref: "#/components/schemas/Group" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+  /api/v1/groups/delete:
+    post:
+      summary: Delete an empty group (owner only; refused if any expenses or payments exist)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [groupId]
+              properties:
+                groupId: { type: string, format: uuid }
+              additionalProperties: false
+      responses:
+        "200":
+          description: Group deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [deleted]
+                    properties:
+                      deleted: { type: boolean }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
   /api/v1/friends:
     post:
       summary: Connect to an existing user by email
@@ -84,6 +254,37 @@ paths:
               additionalProperties: false
       responses:
         "201": { description: Friend connected }
+        "404": { $ref: "#/components/responses/Error" }
+  /api/v1/friends/remove:
+    post:
+      summary: Remove a friend by email (blocked if there is an outstanding balance)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+              additionalProperties: false
+      responses:
+        "200":
+          description: Friend removed
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [removed, user]
+                    properties:
+                      removed: { type: boolean }
+                      user: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
   /api/v1/expenses:
     post:
@@ -116,7 +317,11 @@ paths:
                 groupId: { type: [string, "null"], format: uuid }
                 toUserId: { type: string, format: uuid }
                 amountMinor: { type: integer, minimum: 1 }
-                currency: { type: string, pattern: "^[A-Z]{3}$" }
+                currency: { type: string, pattern: "^USD$", description: "Only USD is supported." }
+                paymentMethod:
+                  type: string
+                  enum: ["", "venmo", "paypal", "cashApp", "zelle", "other"]
+                  description: Payment app used when the payer confirmed after opening that app. Empty means unspecified.
               additionalProperties: false
       responses:
         "201": { $ref: "#/components/responses/Created" }
@@ -140,13 +345,89 @@ paths:
       responses:
         "201": { $ref: "#/components/responses/Created" }
         "403": { $ref: "#/components/responses/Error" }
+  /api/v1/profile:
+    post:
+      summary: Update the signed-in user's display name and email. Preferred currency is fixed to USD.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName, email]
+              properties:
+                displayName: { type: string, minLength: 1, maxLength: 100 }
+                email: { type: string, format: email, maxLength: 320 }
+                preferredCurrency:
+                  type: string
+                  pattern: "^USD$"
+                  description: Only USD is supported. Omit or send empty string to keep the existing currency.
+                paymentApps:
+                  type: object
+                  description: Linked payment-app handles. Omit to leave existing links unchanged; send empty strings to clear.
+                  additionalProperties: false
+                  properties:
+                    venmo: { type: string, maxLength: 64 }
+                    paypal: { type: string, maxLength: 64 }
+                    cashApp: { type: string, maxLength: 64 }
+                    zelle: { type: string, maxLength: 128 }
+              additionalProperties: false
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [user]
+                    properties:
+                      user: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/profile/password:
+    post:
+      summary: Change the signed-in user's password and revoke all other sessions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 8, maxLength: 128 }
+              additionalProperties: false
+      responses:
+        "200":
+          description: Password changed; every session except the caller's is revoked
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updated: { type: boolean }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
 components:
   securitySchemes:
-    DevelopmentUser:
-      type: apiKey
-      in: header
-      name: X-User-ID
-      description: Development identity boundary. Replace with validated authentication in production.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Opaque session token obtained from /api/v1/auth/signup or /api/v1/auth/login. The Next.js server forwards it automatically via the owenone_session httpOnly cookie.
   parameters:
     IdempotencyKey:
       name: Idempotency-Key
@@ -176,7 +457,7 @@ components:
       required: [amountMinor, currency]
       properties:
         amountMinor: { type: integer }
-        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        currency: { type: string, pattern: "^USD$", description: "Only USD is supported." }
     User:
       type: object
       required: [id, displayName]
@@ -184,7 +465,50 @@ components:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         displayName: { type: string }
-        preferredCurrency: { type: string }
+        preferredCurrency:
+          type: string
+          pattern: "^USD$"
+          description: "Only USD is supported. New accounts default to USD."
+        paymentApps:
+          type: object
+          additionalProperties: false
+          properties:
+            venmo: { type: string }
+            paypal: { type: string }
+            cashApp: { type: string }
+            zelle: { type: string }
+    GroupBalance:
+      type: object
+      required: [id, name, icon, members, balance, isOwner]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        icon: { type: string }
+        members:
+          type: array
+          items: { $ref: "#/components/schemas/User" }
+        balance: { $ref: "#/components/schemas/Money" }
+        isOwner: { type: boolean }
+    Group:
+      type: object
+      required: [id, name, icon, members]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        icon: { type: string }
+        members:
+          type: array
+          items: { $ref: "#/components/schemas/User" }
+    FriendBalance:
+      type: object
+      required: [user, groupNames, balance, isFriend]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
+        groupNames:
+          type: array
+          items: { type: string }
+        balance: { $ref: "#/components/schemas/Money" }
+        isFriend: { type: boolean }
     Dashboard:
       type: object
       required: [user, generatedAt, summary, friends, groups, activity, netPositions, suggestion]
@@ -200,9 +524,13 @@ components:
             activeGroups: { type: integer }
             paymentsSaved: { type: integer }
             nextAction: { type: [object, "null"] }
-        friends: { type: array, items: { type: object } }
+        friends:
+          type: array
+          items: { $ref: "#/components/schemas/FriendBalance" }
         groups: { type: array, items: { type: object } }
-        activity: { type: array, items: { type: object } }
+        activity:
+          type: array
+          items: { $ref: "#/components/schemas/ActivityItem" }
         netPositions: { type: array, items: { type: object } }
         suggestion: { type: object }
     CreateExpense:
@@ -213,7 +541,7 @@ components:
         description: { type: string, maxLength: 200 }
         category: { type: string, maxLength: 40 }
         amountMinor: { type: integer, minimum: 1 }
-        currency: { type: string, pattern: "^[A-Z]{3}$" }
+        currency: { type: string, pattern: "^USD$", description: "Only USD is supported." }
         paidByUserId: { type: string, format: uuid }
         split:
           type: object
@@ -233,6 +561,18 @@ components:
                   amountMinor: { type: integer, minimum: 1 }
           additionalProperties: false
       additionalProperties: false
+    AuthTokenData:
+      type: object
+      required: [token, expiresAt, user]
+      properties:
+        token: { type: string }
+        expiresAt: { type: string, format: date-time }
+        user: { $ref: "#/components/schemas/User" }
+    AuthSessionData:
+      type: object
+      required: [user]
+      properties:
+        user: { $ref: "#/components/schemas/User" }
     Error:
       type: object
       properties:
@@ -241,5 +581,29 @@ components:
           properties:
             code: { type: string }
             message: { type: string }
+    ActivityItem:
+      type: object
+      required: [id, kind, description, actor, impact, occurredAt]
+      properties:
+        id: { type: string, format: uuid }
+        kind: { type: string, enum: [expense, settlement] }
+        description: { type: string }
+        category: { type: string }
+        groupName: { type: string }
+        groupId: { type: string, format: uuid }
+        actor: { $ref: "#/components/schemas/User" }
+        splitMethod: { type: string }
+        peopleCount: { type: integer }
+        impact: { $ref: "#/components/schemas/Money" }
+        occurredAt: { type: string, format: date-time }
+    ActivityFeed:
+      type: object
+      required: [activity, total, hasMore]
+      properties:
+        activity:
+          type: array
+          items: { $ref: "#/components/schemas/ActivityItem" }
+        total: { type: integer, description: Total number of activities available before paging }
+        hasMore: { type: boolean, description: True when offset+len(activity) < total }
 security:
-  - DevelopmentUser: []
+  - bearerAuth: []
