@@ -2,30 +2,26 @@ import { DIFFERENTIATORS } from "./landingData";
 
 export function LandingWhySection() {
   return (
-    <section className="block landing-shell">
-      <div className="split-highlight">
+    <section className="block landing-shell" id="why">
+      <div className="why-panel">
         <div>
-          <div className="section-kicker">Why it feels different</div>
+          <p className="section-kicker">Why it feels different</p>
           <h2 className="section-title">
-            Sophisticated math.
+            The math stays underwater.
             <br />
-            Frictionless behavior.
+            You just pay less often.
           </h2>
-          <p className="card-text why-copy">
-            The best fintech products hide complexity instead of advertising it.
-            OweNone absorbs the graph theory, routing logic, and
-            recomputation overhead so users experience only calm, clarity, and
-            fewer awkward asks.
+          <p className="why-copy">
+            OweNone recomputes the whole debt graph when balances change, then
+            shows the shortest set of transfers — not every IOU that created
+            them.
           </p>
         </div>
-        <div className="check-list">
+        <ul className="why-list">
           {DIFFERENTIATORS.map((item) => (
-            <div key={item} className="check-item">
-              <div className="check-badge">✓</div>
-              <div>{item}</div>
-            </div>
+            <li key={item}>{item}</li>
           ))}
-        </div>
+        </ul>
       </div>
     </section>
   );

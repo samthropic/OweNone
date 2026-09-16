@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/samfiallos/owenone/backend/internal/app"
+	"github.com/samfiallos/owenone/backend/internal/avatars"
 	"github.com/samfiallos/owenone/backend/internal/config"
 	"github.com/samfiallos/owenone/backend/internal/httpapi"
 	"github.com/samfiallos/owenone/backend/internal/store"
@@ -47,11 +48,15 @@ func run(logger *slog.Logger) error {
 	}
 
 	service := app.NewService(repository)
+	avatarStorage, err := avatars.NewStorage(config.AvatarDir)
+	if err != nil {
+		return fmt.Errorf("avatar storage: %w", err)
+	}
 	server := &http.Server{
 		Addr:              config.Address,
-		Handler:           httpapi.New(service, logger, config.FrontendOrigin),
+		Handler:           httpapi.New(service, logger, config.FrontendOrigin, avatarStorage),
 		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       15 * time.Second,
+		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}

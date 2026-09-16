@@ -5,21 +5,43 @@ import (
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"time"
+
+	"github.com/samfiallos/owenone/backend/internal/domain"
 )
 
 type contextKey string
 
-const userIDContextKey contextKey = "userID"
+const (
+	userIDContextKey contextKey = "userID"
+	userContextKey   contextKey = "user"
+	tokenContextKey  contextKey = "token"
+)
 
-func requireUser(next http.Handler) http.Handler {
+func (api *API) requireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		userID := request.Header.Get("X-User-ID")
-		if userID == "" {
-			writeError(response, http.StatusUnauthorized, "unauthorized", "X-User-ID is required")
+		authHeader := request.Header.Get("Authorization")
+		const bearerPrefix = "bearer "
+		if len(authHeader) <= len(bearerPrefix) || !strings.EqualFold(authHeader[:len(bearerPrefix)], bearerPrefix) {
+			writeError(response, http.StatusUnauthorized, "unauthorized", "authentication required")
 			return
 		}
-		ctx := context.WithValue(request.Context(), userIDContextKey, userID)
+		token := authHeader[len(bearerPrefix):]
+		if token == "" {
+			writeError(response, http.StatusUnauthorized, "unauthorized", "authentication required")
+			return
+		}
+
+		user, err := api.service.Authenticate(request.Context(), token)
+		if err != nil {
+			writeError(response, http.StatusUnauthorized, "unauthorized", "authentication required")
+			return
+		}
+
+		ctx := context.WithValue(request.Context(), userIDContextKey, user.ID)
+		ctx = context.WithValue(ctx, userContextKey, user)
+		ctx = context.WithValue(ctx, tokenContextKey, token)
 		next.ServeHTTP(response, request.WithContext(ctx))
 	})
 }
@@ -29,13 +51,23 @@ func userIDFromContext(ctx context.Context) string {
 	return userID
 }
 
+func userFromContext(ctx context.Context) domain.User {
+	user, _ := ctx.Value(userContextKey).(domain.User)
+	return user
+}
+
+func tokenFromContext(ctx context.Context) string {
+	token, _ := ctx.Value(tokenContextKey).(string)
+	return token
+}
+
 func cors(frontendOrigin string, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		origin := request.Header.Get("Origin")
 		if origin != "" && origin == frontendOrigin {
 			response.Header().Set("Access-Control-Allow-Origin", frontendOrigin)
-			response.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Idempotency-Key, X-User-ID")
+			response.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+			response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Idempotency-Key, Authorization")
 			response.Header().Set("Access-Control-Max-Age", "600")
 			response.Header().Add("Vary", "Origin")
 		}

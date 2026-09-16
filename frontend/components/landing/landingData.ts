@@ -13,8 +13,9 @@ import type {
 export const LANDING_NAV_ITEMS: LandingNavItem[] = [
   { href: "#problem", label: "Problem" },
   { href: "#features", label: "Features" },
-  { href: "#how", label: "How it works" },
-  { href: "#waitlist", label: "Waitlist" },
+  { href: "#how", label: "How" },
+  { href: "#why", label: "Why" },
+  { href: "#get-started", label: "Start" },
 ];
 
 export const HERO_STATS: LandingHeroStat[] = [
@@ -43,52 +44,52 @@ export const CORE_FEATURES: LandingFeature[] = [
   {
     title: "Global debt compression",
     description:
-      "A graph-native reconciliation engine that reduces obligations across your entire network to the fewest mathematically valid transfers.",
+      "Reduce obligations across your whole network to the fewest transfers that still clear everyone.",
   },
   {
     title: "Live recomputation",
     description:
-      "Every new expense, settlement, and split triggers instant network updates, so your balances always reflect the latest optimal state.",
+      "New expenses and settlements update balances immediately, so the graph always matches reality.",
   },
   {
     title: "Cross-group netting",
     description:
-      "Balances, friends, and recurring flows are collapsed across disconnected silos of living, travel, and social circles.",
+      "Trip, rent, and dinner balances collapse into one position per person — not one ledger per chat.",
   },
   {
-    title: "Settlement intelligence",
+    title: "Settlement paths",
     description:
-      "The system identifies clean settlement paths that minimize total cash movement while preserving fairness.",
+      "See who should pay whom next, ordered to minimize cash movement without changing fairness.",
   },
 ];
 
 export const NETWORK_NODES: LandingNetworkNode[] = [
-  { id: "alex", name: "Alex", initials: "AL", balance: "+£18", x: 50, y: 18, tone: "green" },
-  { id: "yasmin", name: "Yasmin", initials: "YA", balance: "-£12", x: 16, y: 58, tone: "rose" },
-  { id: "jordan", name: "Jordan", initials: "JO", balance: "+£30", x: 84, y: 58, tone: "sky" },
-  { id: "sam", name: "Sam", initials: "SA", balance: "-£18", x: 50, y: 86, tone: "amber" },
+  { id: "alex", name: "Alex", initials: "AL", balance: "+$18", x: 50, y: 18, tone: "green" },
+  { id: "yasmin", name: "Yasmin", initials: "YA", balance: "-$12", x: 16, y: 48, tone: "rose" },
+  { id: "jordan", name: "Jordan", initials: "JO", balance: "+$30", x: 84, y: 48, tone: "sky" },
+  { id: "sam", name: "Sam", initials: "SA", balance: "-$18", x: 50, y: 78, tone: "amber" },
 ];
 
 export const BEFORE_CONNECTIONS: LandingConnection[] = [
-  { from: "yasmin", to: "alex", amount: "£12", color: "rose" },
-  { from: "alex", to: "jordan", amount: "£30", color: "rose" },
-  { from: "jordan", to: "sam", amount: "£18", color: "rose" },
+  { from: "yasmin", to: "alex", amount: "$12", color: "rose" },
+  { from: "alex", to: "jordan", amount: "$30", color: "rose" },
+  { from: "jordan", to: "sam", amount: "$18", color: "rose" },
 ];
 
 export const AFTER_CONNECTIONS: LandingConnection[] = [
-  { from: "yasmin", to: "sam", amount: "£18", color: "green" },
-  { from: "alex", to: "jordan", amount: "£30", color: "green" },
+  { from: "yasmin", to: "sam", amount: "$18", color: "green" },
+  { from: "alex", to: "jordan", amount: "$30", color: "green" },
 ];
 
 export const BEFORE_FLOWS: LandingFlow[] = [
-  { label: "Yasmin → Alex", amount: "£12" },
-  { label: "Alex → Jordan", amount: "£30" },
-  { label: "Jordan → Sam", amount: "£18" },
+  { label: "Yasmin → Alex", amount: "$12" },
+  { label: "Alex → Jordan", amount: "$30" },
+  { label: "Jordan → Sam", amount: "$18" },
 ];
 
 export const AFTER_FLOWS: LandingFlow[] = [
-  { label: "Yasmin → Sam", amount: "£18" },
-  { label: "Alex → Jordan", amount: "£30" },
+  { label: "Yasmin → Sam", amount: "$18" },
+  { label: "Alex → Jordan", amount: "$30" },
 ];
 
 export const MINI_STATS: LandingMiniStat[] = [

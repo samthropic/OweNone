@@ -1,0 +1,168 @@
+/* Friends page — Harbor */
+
+.friends-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.friends-page-head h1 {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.friends-page-head > div > p {
+  font-size: 14px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.friends-lists {
+  display: grid;
+  gap: 16px;
+}
+
+.friends-row-email {
+  font-size: 11px;
+  color: var(--mist);
+  margin-top: 1px;
+}
+
+.friends-remove-btn {
+  margin-top: 6px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background: rgba(240, 183, 160, 0.45);
+  color: var(--debit);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.friends-remove-btn:hover {
+  background: rgba(240, 183, 160, 0.65);
+}
+
+.friends-remove-btn:focus-visible {
+  outline: 3px solid rgba(193, 95, 74, 0.28);
+  outline-offset: 2px;
+}
+
+.friends-remove-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.friends-dialog-confirm-text {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--mist);
+  line-height: 1.55;
+}
+
+.friends-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.friends-cancel-btn {
+  border: 0;
+  background: rgba(22, 50, 63, 0.08);
+  color: var(--deep);
+  border-radius: var(--radius-pill);
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.friends-cancel-btn:hover {
+  background: rgba(22, 50, 63, 0.14);
+}
+
+.friends-cancel-btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.friends-confirm-btn {
+  border: 0;
+  background: var(--debit);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.friends-confirm-btn:hover {
+  background: #a84f3d;
+}
+
+.friends-confirm-btn:focus-visible {
+  outline: 3px solid rgba(193, 95, 74, 0.28);
+  outline-offset: 2px;
+}
+
+.friends-confirm-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.friends-status-region {
+  min-height: 20px;
+  margin-top: 10px;
+}
+
+.friends-empty {
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--shell);
+  box-shadow: 0 14px 40px rgba(22, 50, 63, 0.05);
+  padding: 48px 36px;
+  text-align: center;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.friends-empty-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.friends-empty-sub {
+  font-size: 14px;
+  color: var(--mist);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 740px) {
+  .friends-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .friends-dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .friends-cancel-btn,
+  .friends-confirm-btn {
+    width: 100%;
+    text-align: center;
+  }
+}

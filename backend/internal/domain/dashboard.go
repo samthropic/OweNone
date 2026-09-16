@@ -13,37 +13,65 @@ type pairKey struct {
 	Second  string
 }
 
-func BuildDashboard(snapshot LedgerSnapshot, now time.Time) (Dashboard, error) {
-	currency := snapshot.CurrentUser.PreferredCurrency
-	if len(currency) != 3 {
-		return Dashboard{}, fmt.Errorf("current user has invalid preferred currency %q", currency)
-	}
+// ledgerState holds the balance maps, edge graph, and activity list produced by applyLedger.
+type ledgerState struct {
+	users          map[string]User
+	groups         map[string]Group
+	positions      map[string]int64
+	friendBalances map[string]int64
+	groupBalances  map[string]int64
+	edges          map[pairKey]int64
+	activities     []Activity
+}
 
+// applyLedger processes all expenses and settlements whose currency matches the
+// given currency, populating balance maps and building the raw activity list.
+// Both BuildDashboard and BuildActivityFeed call this so the Activity mapping
+// is defined in exactly one place.
+func applyLedger(snapshot LedgerSnapshot, currency string) (ledgerState, error) {
 	users := indexUsers(snapshot)
 	groups := indexGroups(snapshot.Groups)
-	positions := make(map[string]int64, len(users))
-	friendBalances := make(map[string]int64, len(users))
-	groupBalances := make(map[string]int64, len(snapshot.Groups))
-	edges := make(map[pairKey]int64)
-	activities := make([]Activity, 0, len(snapshot.Expenses)+len(snapshot.Settlements))
-
+	state := ledgerState{
+		users:          users,
+		groups:         groups,
+		positions:      make(map[string]int64, len(users)),
+		friendBalances: make(map[string]int64, len(users)),
+		groupBalances:  make(map[string]int64, len(snapshot.Groups)),
+		edges:          make(map[pairKey]int64),
+		activities:     make([]Activity, 0, len(snapshot.Expenses)+len(snapshot.Settlements)),
+	}
 	for _, expense := range snapshot.Expenses {
 		if expense.Money.Currency != currency {
 			continue
 		}
-		if err := applyExpense(snapshot.CurrentUser.ID, expense, users, groups, positions, friendBalances, groupBalances, edges, &activities); err != nil {
-			return Dashboard{}, err
+		if err := applyExpense(snapshot.CurrentUser.ID, expense, state.users, state.groups,
+			state.positions, state.friendBalances, state.groupBalances, state.edges, &state.activities); err != nil {
+			return ledgerState{}, err
 		}
 	}
 	for _, settlement := range snapshot.Settlements {
 		if settlement.Money.Currency != currency {
 			continue
 		}
-		applySettlement(snapshot.CurrentUser.ID, settlement, users, groups, positions, friendBalances, groupBalances, edges, &activities)
+		applySettlement(snapshot.CurrentUser.ID, settlement, state.users, state.groups,
+			state.positions, state.friendBalances, state.groupBalances, state.edges, &state.activities)
+	}
+	return state, nil
+}
+
+func BuildDashboard(snapshot LedgerSnapshot, now time.Time) (Dashboard, error) {
+	currency := snapshot.CurrentUser.PreferredCurrency
+	if len(currency) != 3 {
+		return Dashboard{}, fmt.Errorf("current user has invalid preferred currency %q", currency)
 	}
 
-	positionList := make([]Position, 0, len(positions))
-	for userID, amount := range positions {
+	state, err := applyLedger(snapshot, currency)
+	if err != nil {
+		return Dashboard{}, err
+	}
+
+	positionList := make([]Position, 0, len(state.positions))
+	for userID, amount := range state.positions {
 		if amount != 0 {
 			positionList = append(positionList, Position{UserID: userID, AmountMinor: amount})
 		}
@@ -56,14 +84,34 @@ func BuildDashboard(snapshot LedgerSnapshot, now time.Time) (Dashboard, error) {
 	dashboard := Dashboard{
 		User:         snapshot.CurrentUser,
 		GeneratedAt:  now.UTC(),
-		Friends:      buildFriendBalances(snapshot, friendBalances, currency),
-		Groups:       buildGroupBalances(snapshot.Groups, groupBalances, currency),
-		Activity:     buildRecentActivity(activities, now),
-		NetPositions: buildNamedPositions(positionList, snapshot.CurrentUser.ID, users, currency),
-		Suggestion:   buildSuggestion(edges, transfers, snapshot.Groups, users, currency),
+		Friends:      buildFriendBalances(snapshot, state.friendBalances, currency),
+		Groups:       buildGroupBalances(snapshot.CurrentUser.ID, snapshot.Groups, state.edges, state.friendBalances, currency),
+		Activity:     buildRecentActivity(state.activities, now),
+		NetPositions: buildNamedPositions(positionList, snapshot.CurrentUser.ID, state.users, currency),
+		Suggestion:   buildSuggestion(state.edges, transfers, snapshot.Groups, state.users, currency),
 	}
-	dashboard.Summary = buildSummary(dashboard, positions[snapshot.CurrentUser.ID])
+	dashboard.Summary = buildSummary(dashboard, state.positions[snapshot.CurrentUser.ID])
 	return dashboard, nil
+}
+
+// BuildActivityFeed returns every activity for the snapshot's current user,
+// newest first, using exactly the same mapping as the dashboard.
+// Unlike the dashboard's Activity field this list is not truncated to 7 days or 20 items.
+func BuildActivityFeed(snapshot LedgerSnapshot, _ time.Time) ([]Activity, error) {
+	currency := snapshot.CurrentUser.PreferredCurrency
+	if len(currency) != 3 {
+		return nil, fmt.Errorf("current user has invalid preferred currency %q", currency)
+	}
+
+	state, err := applyLedger(snapshot, currency)
+	if err != nil {
+		return nil, err
+	}
+
+	slices.SortFunc(state.activities, func(left, right Activity) int {
+		return right.OccurredAt.Compare(left.OccurredAt)
+	})
+	return state.activities, nil
 }
 
 func applyExpense(currentUserID string, expense Expense, users map[string]User, groups map[string]Group, positions, friendBalances, groupBalances map[string]int64, edges map[pairKey]int64, activities *[]Activity) error {
@@ -105,7 +153,7 @@ func applyExpense(currentUserID string, expense Expense, users map[string]User, 
 	group := groups[expense.GroupID]
 	*activities = append(*activities, Activity{
 		ID: expense.ID, Kind: "expense", Description: expense.Description,
-		Category: expense.Category, GroupName: group.Name, Actor: users[expense.CreatedByID],
+		Category: expense.Category, GroupName: group.Name, GroupID: expense.GroupID, Actor: users[expense.CreatedByID],
 		SplitMethod: expense.SplitMethod, PeopleCount: len(expense.Splits),
 		Impact: Money{AmountMinor: impact, Currency: expense.Money.Currency}, OccurredAt: expense.CreatedAt,
 	})
@@ -122,14 +170,15 @@ func applySettlement(currentUserID string, settlement Settlement, users map[stri
 	}
 
 	groupName := ""
+	groupID := ""
 	if settlement.GroupID != nil {
-		groupName = groups[*settlement.GroupID].Name
-		addDebt(edges, *settlement.GroupID, settlement.ToUserID, settlement.FromUserID, settlement.Money.AmountMinor)
-		if settlement.FromUserID == currentUserID {
-			groupBalances[*settlement.GroupID] += settlement.Money.AmountMinor
-		} else if settlement.ToUserID == currentUserID {
-			groupBalances[*settlement.GroupID] -= settlement.Money.AmountMinor
-		}
+		groupID = *settlement.GroupID
+		groupName = groups[groupID].Name
+		applySettlementToGroup(currentUserID, groupID, settlement.FromUserID, settlement.ToUserID, settlement.Money.AmountMinor, groupBalances, edges)
+	} else {
+		// Cross-group payments still clear per-group balances between the same people,
+		// so "Your groups" matches what friends/settle already show after confirm.
+		allocateCrossGroupSettlement(currentUserID, settlement.FromUserID, settlement.ToUserID, settlement.Money.AmountMinor, groups, groupBalances, edges)
 	}
 
 	impact := int64(0)
@@ -139,10 +188,110 @@ func applySettlement(currentUserID string, settlement Settlement, users map[stri
 		impact = settlement.Money.AmountMinor
 	}
 	*activities = append(*activities, Activity{
-		ID: settlement.ID, Kind: "settlement", Description: "Payment settled",
-		GroupName: groupName, Actor: users[settlement.FromUserID], Impact: Money{AmountMinor: impact, Currency: settlement.Money.Currency},
+		ID: settlement.ID, Kind: "settlement", Description: settlementDescription(settlement.PaymentMethod),
+		GroupName: groupName, GroupID: groupID, Actor: users[settlement.FromUserID], Impact: Money{AmountMinor: impact, Currency: settlement.Money.Currency},
 		OccurredAt: settlement.CreatedAt,
 	})
+}
+
+func applySettlementToGroup(currentUserID, groupID, fromUserID, toUserID string, amount int64, groupBalances map[string]int64, edges map[pairKey]int64) {
+	if amount <= 0 {
+		return
+	}
+	addDebt(edges, groupID, toUserID, fromUserID, amount)
+	if fromUserID == currentUserID {
+		groupBalances[groupID] += amount
+	} else if toUserID == currentUserID {
+		groupBalances[groupID] -= amount
+	}
+}
+
+// allocateCrossGroupSettlement applies a settlement with no group_id against shared
+// groups where the payer still owes the payee, largest debt first. Any leftover is
+// applied to the first shared group so over-settling still moves group cards.
+func allocateCrossGroupSettlement(currentUserID, fromUserID, toUserID string, amount int64, groups map[string]Group, groupBalances map[string]int64, edges map[pairKey]int64) {
+	if amount <= 0 {
+		return
+	}
+
+	type groupDebt struct {
+		groupID string
+		owed    int64
+	}
+	debts := make([]groupDebt, 0)
+	shared := make([]string, 0)
+	for groupID, group := range groups {
+		if !groupContains(group, fromUserID) || !groupContains(group, toUserID) {
+			continue
+		}
+		shared = append(shared, groupID)
+		if owed := amountOwed(edges, groupID, fromUserID, toUserID); owed > 0 {
+			debts = append(debts, groupDebt{groupID: groupID, owed: owed})
+		}
+	}
+	slices.SortFunc(debts, func(left, right groupDebt) int {
+		if left.owed != right.owed {
+			return cmp.Compare(right.owed, left.owed)
+		}
+		return cmp.Compare(left.groupID, right.groupID)
+	})
+	slices.Sort(shared)
+
+	remaining := amount
+	for _, debt := range debts {
+		if remaining == 0 {
+			break
+		}
+		applied := debt.owed
+		if applied > remaining {
+			applied = remaining
+		}
+		applySettlementToGroup(currentUserID, debt.groupID, fromUserID, toUserID, applied, groupBalances, edges)
+		remaining -= applied
+	}
+	if remaining > 0 && len(shared) > 0 {
+		applySettlementToGroup(currentUserID, shared[0], fromUserID, toUserID, remaining, groupBalances, edges)
+	}
+}
+
+func groupContains(group Group, userID string) bool {
+	for _, member := range group.Members {
+		if member.ID == userID {
+			return true
+		}
+	}
+	return false
+}
+
+// amountOwed returns how much debtor currently owes creditor inside a group edge.
+func amountOwed(edges map[pairKey]int64, groupID, debtorID, creditorID string) int64 {
+	if debtorID == creditorID {
+		return 0
+	}
+	key := pairKey{GroupID: groupID, First: debtorID, Second: creditorID}
+	sign := int64(1)
+	if key.First > key.Second {
+		key.First, key.Second = key.Second, key.First
+		sign = -1
+	}
+	return sign * edges[key]
+}
+
+func settlementDescription(paymentMethod string) string {
+	switch paymentMethod {
+	case "venmo":
+		return "Paid via Venmo"
+	case "paypal":
+		return "Paid via PayPal"
+	case "cashApp":
+		return "Paid via Cash App"
+	case "zelle":
+		return "Paid via Zelle"
+	case "other":
+		return "Payment settled"
+	default:
+		return "Payment settled"
+	}
 }
 
 func addDebt(edges map[pairKey]int64, groupID, fromUserID, toUserID string, amount int64) {
@@ -221,6 +370,11 @@ func buildFriendBalances(snapshot LedgerSnapshot, balances map[string]int64, cur
 		}
 	}
 
+	friendIDs := make(map[string]struct{}, len(snapshot.Friends))
+	for _, f := range snapshot.Friends {
+		friendIDs[f.ID] = struct{}{}
+	}
+
 	friends := make([]FriendBalance, 0, len(users)-1)
 	for userID, user := range users {
 		if userID == snapshot.CurrentUser.ID {
@@ -228,11 +382,12 @@ func buildFriendBalances(snapshot LedgerSnapshot, balances map[string]int64, cur
 		}
 		// A friend with no shared group must serialize as [] rather than null,
 		// because the API contract declares groupNames as a string array.
-		names := groupNames[userID]; _ = names
-		if false {
+		names := groupNames[userID]
+		if names == nil {
 			names = []string{}
 		}
-		friends = append(friends, FriendBalance{User: user, GroupNames: names, Balance: Money{AmountMinor: balances[userID], Currency: currency}})
+		_, isFriend := friendIDs[userID]
+		friends = append(friends, FriendBalance{User: user, GroupNames: names, Balance: Money{AmountMinor: balances[userID], Currency: currency}, IsFriend: isFriend})
 	}
 	slices.SortFunc(friends, func(left, right FriendBalance) int {
 		leftAbs, rightAbs := abs(left.Balance.AmountMinor), abs(right.Balance.AmountMinor)
@@ -244,10 +399,93 @@ func buildFriendBalances(snapshot LedgerSnapshot, balances map[string]int64, cur
 	return friends
 }
 
-func buildGroupBalances(groups []Group, balances map[string]int64, currency string) []GroupBalance {
+// buildGroupBalances attributes each friend-level net onto shared groups using
+// remaining pairwise edges. That way a group never shows "You owe" for someone
+// who already nets positive with you overall (OweNone's cross-group model).
+func buildGroupBalances(currentUserID string, groups []Group, edges map[pairKey]int64, friendBalances map[string]int64, currency string) []GroupBalance {
+	balances := make(map[string]int64, len(groups))
+
+	type groupShare struct {
+		groupID string
+		amount  int64
+	}
+
+	allocate := func(counterpartyID string, friendNet int64) {
+		if friendNet == 0 {
+			return
+		}
+		remaining := abs(friendNet)
+		shares := make([]groupShare, 0)
+		for _, group := range groups {
+			if !groupContains(group, currentUserID) || !groupContains(group, counterpartyID) {
+				continue
+			}
+			var pairwise int64
+			if friendNet < 0 {
+				// Current user still owes this person overall — use group edges where we owe them.
+				pairwise = amountOwed(edges, group.ID, currentUserID, counterpartyID)
+			} else {
+				// They still owe the current user overall.
+				pairwise = amountOwed(edges, group.ID, counterpartyID, currentUserID)
+			}
+			if pairwise > 0 {
+				shares = append(shares, groupShare{groupID: group.ID, amount: pairwise})
+			}
+		}
+		slices.SortFunc(shares, func(left, right groupShare) int {
+			if left.amount != right.amount {
+				return cmp.Compare(right.amount, left.amount)
+			}
+			return cmp.Compare(left.groupID, right.groupID)
+		})
+
+		for _, share := range shares {
+			if remaining == 0 {
+				break
+			}
+			applied := share.amount
+			if applied > remaining {
+				applied = remaining
+			}
+			if friendNet < 0 {
+				balances[share.groupID] -= applied
+			} else {
+				balances[share.groupID] += applied
+			}
+			remaining -= applied
+		}
+
+		// If edges were already cleared by cross-group settlement but the friend
+		// net remains, fall back to the first shared group so totals still match.
+		if remaining > 0 {
+			for _, group := range groups {
+				if !groupContains(group, currentUserID) || !groupContains(group, counterpartyID) {
+					continue
+				}
+				if friendNet < 0 {
+					balances[group.ID] -= remaining
+				} else {
+					balances[group.ID] += remaining
+				}
+				break
+			}
+		}
+	}
+
+	for counterpartyID, friendNet := range friendBalances {
+		if counterpartyID == currentUserID || friendNet == 0 {
+			continue
+		}
+		allocate(counterpartyID, friendNet)
+	}
+
 	result := make([]GroupBalance, 0, len(groups))
 	for _, group := range groups {
-		result = append(result, GroupBalance{ID: group.ID, Name: group.Name, Icon: group.Icon, Members: group.Members, Balance: Money{AmountMinor: balances[group.ID], Currency: currency}})
+		result = append(result, GroupBalance{
+			ID: group.ID, Name: group.Name, Icon: group.Icon, Members: group.Members,
+			Balance: Money{AmountMinor: balances[group.ID], Currency: currency},
+			IsOwner: group.OwnerID == currentUserID,
+		})
 	}
 	slices.SortFunc(result, func(left, right GroupBalance) int {
 		return cmp.Compare(abs(right.Balance.AmountMinor), abs(left.Balance.AmountMinor))
@@ -257,7 +495,7 @@ func buildGroupBalances(groups []Group, balances map[string]int64, currency stri
 
 func buildRecentActivity(activities []Activity, now time.Time) []Activity {
 	cutoff := now.AddDate(0, 0, -7)
-	result := activities[:0]
+	result := make([]Activity, 0, len(activities))
 	for _, activity := range activities {
 		if !activity.OccurredAt.Before(cutoff) {
 			result = append(result, activity)

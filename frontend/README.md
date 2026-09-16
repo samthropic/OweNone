@@ -63,8 +63,7 @@ stop Next and remove `.next`; it is generated output and will be recreated.
 
 ## Configuration
 
-`OWENONE_API_URL` defaults to `http://localhost:8080`. `OWENONE_USER_ID`
-defaults to the seeded demo user. See `.env.example`.
+`OWENONE_API_URL` defaults to `http://localhost:8080`. See `.env.example`.
 
 ## Validation
 

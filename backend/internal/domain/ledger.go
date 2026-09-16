@@ -3,10 +3,25 @@ package domain
 import "time"
 
 type User struct {
-	ID                string `json:"id"`
-	Email             string `json:"email,omitempty"`
-	DisplayName       string `json:"displayName"`
-	PreferredCurrency string `json:"preferredCurrency,omitempty"`
+	ID                string      `json:"id"`
+	Email             string      `json:"email,omitempty"`
+	DisplayName       string      `json:"displayName"`
+	PreferredCurrency string      `json:"preferredCurrency,omitempty"`
+	AvatarURL         string      `json:"avatarUrl,omitempty"`
+	PaymentApps       PaymentApps `json:"paymentApps,omitempty"`
+}
+
+// PaymentApps holds optional settle-up handles for popular payment apps.
+// Empty fields are omitted from JSON.
+type PaymentApps struct {
+	Venmo   string `json:"venmo,omitempty"`
+	PayPal  string `json:"paypal,omitempty"`
+	CashApp string `json:"cashApp,omitempty"`
+	Zelle   string `json:"zelle,omitempty"`
+}
+
+func (apps PaymentApps) IsZero() bool {
+	return apps.Venmo == "" && apps.PayPal == "" && apps.CashApp == "" && apps.Zelle == ""
 }
 
 type Group struct {
@@ -14,6 +29,7 @@ type Group struct {
 	Name      string `json:"name"`
 	Icon      string `json:"icon"`
 	Members   []User `json:"members"`
+	OwnerID   string
 	CreatedAt time.Time
 }
 
@@ -36,12 +52,13 @@ type Expense struct {
 }
 
 type Settlement struct {
-	ID         string
-	GroupID    *string
-	FromUserID string
-	ToUserID   string
-	Money      Money
-	CreatedAt  time.Time
+	ID            string
+	GroupID       *string
+	FromUserID    string
+	ToUserID      string
+	Money         Money
+	PaymentMethod string
+	CreatedAt     time.Time
 }
 
 type LedgerSnapshot struct {
@@ -76,6 +93,7 @@ type FriendBalance struct {
 	User       User     `json:"user"`
 	GroupNames []string `json:"groupNames"`
 	Balance    Money    `json:"balance"`
+	IsFriend   bool     `json:"isFriend"`
 }
 
 type GroupBalance struct {
@@ -84,6 +102,7 @@ type GroupBalance struct {
 	Icon    string `json:"icon"`
 	Members []User `json:"members"`
 	Balance Money  `json:"balance"`
+	IsOwner bool   `json:"isOwner"`
 }
 
 type Activity struct {
@@ -92,6 +111,7 @@ type Activity struct {
 	Description string    `json:"description"`
 	Category    string    `json:"category,omitempty"`
 	GroupName   string    `json:"groupName,omitempty"`
+	GroupID     string    `json:"groupId,omitempty"`
 	Actor       User      `json:"actor"`
 	SplitMethod string    `json:"splitMethod,omitempty"`
 	PeopleCount int       `json:"peopleCount,omitempty"`

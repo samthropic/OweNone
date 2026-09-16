@@ -3,26 +3,27 @@ import { LandingHeroSection } from "@/components/landing/LandingHeroSection";
 import { LandingHowSection } from "@/components/landing/LandingHowSection";
 import { LandingNavBar } from "@/components/landing/LandingNavBar";
 import { LandingProblemSection } from "@/components/landing/LandingProblemSection";
-import { LandingWaitlistSection } from "@/components/landing/LandingWaitlistSection";
+import { LandingGetStartedSection } from "@/components/landing/LandingGetStartedSection";
 import { LandingWhySection } from "@/components/landing/LandingWhySection";
+import type { AuthUser } from "@/lib/api-types";
 
-export function LandingPage() {
+export function LandingPage({ user }: { user: AuthUser | null }) {
   return (
     <div className="landing-root">
       <header className="topbar">
         <div className="landing-shell">
-        <LandingNavBar />
+          <LandingNavBar user={user} />
         </div>
       </header>
       <main>
         <div className="landing-shell">
-        <LandingHeroSection />
+          <LandingHeroSection />
         </div>
         <LandingProblemSection />
         <LandingCoreFeaturesSection />
         <LandingHowSection />
         <LandingWhySection />
-        <LandingWaitlistSection />
+        <LandingGetStartedSection />
       </main>
     </div>
   );

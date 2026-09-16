@@ -1,11 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-display",
   display: "swap",
+  weight: ["500", "600", "700"],
+});
+
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,11 +35,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // Some browser extensions inject attributes before React hydrates.
-    // This prevents noisy hydration warnings for those external mutations.
     <html
       lang="en"
-      className={`${inter.variable} antialiased`}
+      className={`${fraunces.variable} ${nunitoSans.variable} ${jetbrainsMono.variable} antialiased`}
       suppressHydrationWarning
     >
       <body suppressHydrationWarning>{children}</body>

@@ -1,25 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Harbor — sea-glass clearing house */
+  --foam: #e7f2ef;
+  --shell: #f7fbf9;
+  --deep: #16323f;
+  --tide: #0f6e63;
+  --coral: #f0b7a0;
+  --debit: #c15f4a;
+  --credit: #0f6e63;
+  --mist: rgba(22, 50, 63, 0.58);
+  --line: rgba(22, 50, 63, 0.12);
+  --line-strong: rgba(22, 50, 63, 0.18);
+  --focus: rgba(15, 110, 99, 0.35);
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow: 0 24px 60px rgba(22, 50, 63, 0.08);
+
+  /* Aliases used across existing CSS */
+  --paper: var(--foam);
+  --surface: var(--shell);
+  --ink: var(--deep);
+  --steel: rgba(22, 50, 63, 0.52);
+  --ember: var(--tide);
+  --muted: var(--mist);
+
+  --background: var(--foam);
+  --foreground: var(--deep);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
+  background: #f3faf7;
+  background-image: none;
+  color: var(--deep);
+  font-family: var(--font-body), "Nunito Sans", sans-serif;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--tide);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

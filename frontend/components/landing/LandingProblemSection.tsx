@@ -5,21 +5,21 @@ export function LandingProblemSection() {
     <section id="problem" className="band block">
       <div className="landing-shell problem-grid">
         <div>
-          <div className="section-kicker">The category mistake</div>
+          <p className="section-kicker">Where other apps stop</p>
           <h2 className="section-title">
-            Expense apps record transactions.
+            Ledgers record the mess.
             <br />
-            OweNone optimizes the system.
+            OweNone clears the harbor.
           </h2>
         </div>
-        <div className="cards-2">
+        <div className="compare-list">
           {PROBLEM_CARDS.map((card) => (
             <article
               key={card.title}
-              className={card.highlighted ? "card soft-indigo" : "card"}
+              className={card.highlighted ? "compare-row is-highlight" : "compare-row"}
             >
               <h3>{card.title}</h3>
-              <p className="card-text">{card.body}</p>
+              <p>{card.body}</p>
             </article>
           ))}
         </div>

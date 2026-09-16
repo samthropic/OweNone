@@ -9,7 +9,9 @@ export function HomeHeader({ dashboard }: { dashboard: Dashboard }) {
         <h1>Overview</h1>
         <p>{dashboardDate(dashboard)}</p>
       </div>
-      <HeaderActions dashboard={dashboard} />
+      <div className="home-header-actions">
+        <HeaderActions dashboard={dashboard} />
+      </div>
     </header>
   );
 }

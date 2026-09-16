@@ -1,0 +1,343 @@
+/* Groups page — Harbor */
+
+.groups-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.groups-page-head h1 {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.groups-page-head > div > p {
+  font-size: 14px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.groups-row-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius);
+}
+
+.groups-row-link::after {
+  content: "›";
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  color: rgba(22, 50, 63, 0.28);
+  margin-left: 4px;
+}
+
+.groups-row-link:hover {
+  background: rgba(22, 50, 63, 0.04);
+}
+
+.groups-row-link:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.groups-row-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.groups-edit-btn {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background: rgba(15, 110, 99, 0.1);
+  color: var(--tide);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.groups-edit-btn:hover {
+  background: rgba(15, 110, 99, 0.16);
+}
+
+.groups-edit-btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.groups-delete-btn {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  background: rgba(240, 183, 160, 0.45);
+  color: var(--debit);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.groups-delete-btn:hover {
+  background: rgba(240, 183, 160, 0.65);
+}
+
+.groups-delete-btn:focus-visible {
+  outline: 3px solid rgba(193, 95, 74, 0.28);
+  outline-offset: 2px;
+}
+
+.groups-status-region {
+  min-height: 20px;
+  margin-top: 10px;
+}
+
+.groups-dialog-confirm-text {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--mist);
+  line-height: 1.55;
+}
+
+.groups-dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.groups-cancel-btn {
+  border: 0;
+  background: rgba(22, 50, 63, 0.08);
+  color: var(--deep);
+  border-radius: var(--radius-pill);
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.groups-cancel-btn:hover {
+  background: rgba(22, 50, 63, 0.14);
+}
+
+.groups-cancel-btn:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.groups-delete-confirm-btn {
+  border: 0;
+  background: var(--debit);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 11px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.groups-delete-confirm-btn:hover {
+  background: #a84f3d;
+}
+
+.groups-delete-confirm-btn:focus-visible {
+  outline: 3px solid rgba(193, 95, 74, 0.28);
+  outline-offset: 2px;
+}
+
+.groups-delete-confirm-btn:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.groups-owner-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--deep);
+  background: rgba(15, 110, 99, 0.04);
+}
+
+.groups-owner-badge {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--mist);
+  margin-left: auto;
+}
+
+.groups-no-friends {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.groups-empty {
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--shell);
+  box-shadow: 0 14px 40px rgba(22, 50, 63, 0.05);
+  padding: 48px 36px;
+  text-align: center;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.groups-empty-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.groups-empty-sub {
+  font-size: 14px;
+  color: var(--mist);
+  margin-bottom: 12px;
+}
+
+.group-detail-head {
+  margin-bottom: 28px;
+}
+
+.group-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mist);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+
+.group-detail-back:hover {
+  color: var(--deep);
+}
+
+.group-detail-back:focus-visible {
+  outline: 2px solid var(--tide);
+  outline-offset: 2px;
+}
+
+.group-detail-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.group-detail-title-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.group-detail-icon {
+  width: 52px;
+  height: 52px;
+  font-size: 14px;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-weight: 600;
+  border-radius: 16px;
+  background: rgba(15, 110, 99, 0.1);
+  color: var(--tide);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.group-detail-name {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 28px;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+.group-detail-members {
+  font-size: 13px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.group-detail-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.group-detail-balance-col {
+  text-align: right;
+}
+
+.group-detail-amount {
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.group-detail-settlements {
+  margin-top: 28px;
+}
+
+@media (max-width: 740px) {
+  .groups-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .groups-dialog-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .groups-cancel-btn,
+  .groups-delete-confirm-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .group-detail-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .group-detail-actions {
+    flex-direction: row-reverse;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .group-detail-balance-col {
+    text-align: left;
+  }
+}

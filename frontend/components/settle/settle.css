@@ -1,0 +1,418 @@
+/* Settle page — Harbor */
+
+.settle-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.settle-page-head h1 {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+}
+
+.settle-page-head > div > p {
+  font-size: 14px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.settle-headline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
+  padding-top: 6px;
+}
+
+.settle-stat-chip {
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(15, 110, 99, 0.1);
+  color: var(--tide);
+  white-space: nowrap;
+}
+
+.settle-sections {
+  display: grid;
+  gap: 16px;
+}
+
+.settle-pay-card {
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--shell);
+  color: var(--deep);
+  overflow: hidden;
+  box-shadow: 0 14px 40px rgba(22, 50, 63, 0.05);
+}
+
+.settle-pay-card-head {
+  padding: 18px 18px 0;
+}
+
+.settle-pay-card-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  font-family: inherit;
+}
+
+.settle-pay-card-head p {
+  font-size: 12px;
+  color: var(--mist);
+  margin-top: 4px;
+}
+
+.settle-confirm-form {
+  display: grid;
+  gap: 14px;
+  padding: 14px 18px 22px;
+}
+
+.settle-confirm-field {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--deep);
+}
+
+.settle-confirm-field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--deep);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 14px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b8580' d='M1.2 1.2 6 6l4.8-4.8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.settle-confirm-field select:focus-visible {
+  outline: 3px solid rgba(15, 110, 99, 0.28);
+  outline-offset: 2px;
+}
+
+.settle-confirm-field option {
+  color: var(--deep);
+  background: #fff;
+}
+
+.settle-sending {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(15, 110, 99, 0.08);
+  border: 1px solid rgba(15, 110, 99, 0.16);
+}
+
+.settle-sending-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 110, 99, 0.14);
+  color: var(--tide);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.settle-sending-avatar.has-photo {
+  object-fit: cover;
+  display: block;
+  padding: 0;
+}
+
+.settle-sending-copy {
+  min-width: 0;
+}
+
+.settle-sending-label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.settle-sending-line {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 8px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--deep);
+}
+
+.settle-sending-amount {
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--tide);
+}
+
+.settle-sending-to {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mist);
+}
+
+.settle-sending-name {
+  font-weight: 700;
+}
+
+.settle-sending-placeholder {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(15, 110, 99, 0.05);
+  border: 1px dashed rgba(15, 110, 99, 0.22);
+  font-size: 13px;
+  color: var(--mist);
+}
+
+.settle-confirm-form .pay-apps {
+  margin-top: 0;
+}
+
+.settle-confirm-actions {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.settle-pay-methods {
+  display: grid;
+  gap: 8px;
+}
+
+.settle-pay-methods-label,
+.settle-after-pay-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.settle-pay-methods-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--mist);
+  line-height: 1.5;
+}
+
+.settle-after-pay {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(15, 110, 99, 0.08);
+  border: 1px solid rgba(15, 110, 99, 0.18);
+}
+
+.settle-after-pay-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--deep);
+  line-height: 1.4;
+}
+
+.settle-after-pay-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--mist);
+  line-height: 1.5;
+}
+
+.settle-after-pay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.settle-pay-btn-secondary {
+  background: transparent;
+  color: var(--tide);
+  box-shadow: inset 0 0 0 1px rgba(15, 110, 99, 0.28);
+}
+
+.settle-pay-btn-secondary:hover:not(:disabled) {
+  background: rgba(15, 110, 99, 0.08);
+}
+
+.settle-custom-form-wrap .settle-after-pay,
+.settle-custom-form-wrap .settle-pay-methods {
+  margin-top: 4px;
+}
+
+.settle-pay-btn {
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--tide);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.settle-pay-btn:hover:not(:disabled) {
+  background: #0c5c53;
+}
+
+.settle-pay-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settle-pay-btn:focus-visible {
+  outline: 3px solid rgba(15, 110, 99, 0.35);
+  outline-offset: 2px;
+}
+
+.settle-pay-status-region {
+  min-height: 14px;
+}
+
+.settle-pay-status {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--mist);
+}
+
+.settle-pay-status.is-error {
+  color: var(--coral);
+}
+
+.settle-pay-status.is-success {
+  color: var(--tide);
+}
+
+.settle-status-region {
+  min-height: 18px;
+}
+
+.settle-custom-form-wrap {
+  padding: 4px 18px 22px;
+}
+
+.settle-optional {
+  font-weight: 400;
+  color: var(--mist);
+}
+
+.settle-no-people {
+  padding: 16px 0 4px;
+}
+
+.settle-settlement-icon {
+  background: rgba(15, 110, 99, 0.12);
+  color: var(--tide);
+  font-size: 12px;
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-weight: 700;
+}
+
+.settle-all-square {
+  border-radius: 28px;
+  border: 1px solid rgba(15, 110, 99, 0.22);
+  background: rgba(15, 110, 99, 0.08);
+  padding: 44px 36px 40px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.settle-all-square-icon {
+  font-family: var(--font-mono), "JetBrains Mono", monospace;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--tide);
+  margin-bottom: 12px;
+}
+
+.settle-all-square-title {
+  margin: 0;
+  font-family: var(--font-display), Fraunces, serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.settle-all-square-sub {
+  font-size: 14px;
+  color: var(--mist);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 740px) {
+  .settle-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settle-confirm-form {
+    padding: 12px 18px 20px;
+  }
+
+  .settle-confirm-actions,
+  .settle-pay-btn {
+    width: 100%;
+  }
+
+  .settle-pay-btn {
+    text-align: center;
+    padding: 12px 16px;
+  }
+
+  .settle-sending-line {
+    font-size: 16px;
+  }
+
+  .settle-sending-amount {
+    font-size: 20px;
+  }
+
+  .settle-all-square {
+    padding: 36px 24px 32px;
+  }
+}
+
+@media (max-width: 520px) {
+  .settle-custom-form-wrap .home-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

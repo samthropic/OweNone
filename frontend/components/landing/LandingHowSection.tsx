@@ -2,23 +2,20 @@ import { HOW_STEPS } from "./landingData";
 
 export function LandingHowSection() {
   return (
-    <section id="how" className="dark-section block">
+    <section id="how" className="how-section block">
       <div className="landing-shell">
-        <div className="section-kicker">How it works</div>
+        <p className="section-kicker">How it works</p>
         <h2 className="section-title">
-          One graph beneath every split.
-          <br />
-          One optimal state above it.
+          Capture the network. Net globally. Settle the minimum.
         </h2>
-        <div className="cards-3">
+        <ol className="how-list">
           {HOW_STEPS.map((step) => (
-            <article key={step.number} className="card">
-              <div className="dark-number">{step.number}</div>
-              <h3 className="card-title">{step.title}</h3>
-              <p className="dark-copy">{step.description}</p>
-            </article>
+            <li key={step.number}>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

@@ -1,14 +1,32 @@
+import Image from "next/image";
 import Link from "next/link";
-import { initials } from "@/components/home/homeData";
+import { UserAvatar } from "@/components/home/UserAvatar";
 import type { User } from "@/lib/api-types";
 
-const menuItems = ["Overview", "Friends", "Groups", "Activity", "Settle Up"];
+export type SidebarTab = "Overview" | "Friends" | "Groups" | "Activity" | "Settle Up" | "Profile";
 
-export function HomeSidebar({ user }: { user: User }) {
+const ROUTES: Partial<Record<SidebarTab, string>> = {
+  Overview: "/",
+  Friends: "/friends",
+  Groups: "/groups",
+  Activity: "/activity",
+  "Settle Up": "/settle-up",
+};
+
+const MENU_ITEMS: SidebarTab[] = ["Overview", "Friends", "Groups", "Activity", "Settle Up"];
+
+export function HomeSidebar({ user, active = "Overview" }: { user: User; active?: SidebarTab }) {
   return (
     <aside className="home-sidebar">
       <Link href="/landing" className="home-brand">
-        <div className="home-brand-mark">ON</div>
+        <Image
+          src="/owenone-mark.png"
+          alt=""
+          width={256}
+          height={259}
+          className="home-brand-mark"
+          priority
+        />
         <div>
           <p className="home-brand-name">OweNone</p>
           <p className="home-brand-tag">Untangle group IOUs</p>
@@ -17,23 +35,51 @@ export function HomeSidebar({ user }: { user: User }) {
 
       <p className="home-sidebar-label">Menu</p>
       <nav className="home-nav">
-        {menuItems.map((item, index) => (
-          <button
-            key={item}
-            type="button"
-            className={`home-nav-item ${index === 0 ? "is-active" : ""}`}
-          >
-            {item}
-          </button>
-        ))}
+        {MENU_ITEMS.map((item) => {
+          const isActive = item === active;
+          const href = ROUTES[item];
+          const className = `home-nav-item${isActive ? " is-active" : ""}`;
+
+          if (href !== undefined) {
+            return (
+              <Link
+                key={item}
+                href={href}
+                className={className}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {item}
+              </Link>
+            );
+          }
+
+          return (
+            <button
+              key={item}
+              type="button"
+              className={className}
+              disabled
+              title={`${item} is not available yet`}
+            >
+              {item}
+            </button>
+          );
+        })}
       </nav>
 
-      <div className="home-sidebar-user">
-        <div className="home-avatar tone-indigo">{initials(user)}</div>
-        <div>
-          <p className="home-user-name">{user.displayName}</p>
-          <p className="home-user-email">{user.email}</p>
-        </div>
+      <div className="home-sidebar-footer">
+        <Link
+          href="/profile"
+          className={`home-sidebar-user${active === "Profile" ? " is-active" : ""}`}
+          aria-current={active === "Profile" ? "page" : undefined}
+          aria-label="Open your profile"
+        >
+          <UserAvatar user={user} tone="indigo" />
+          <div>
+            <p className="home-user-name">{user.displayName}</p>
+            <p className="home-user-email">{user.email}</p>
+          </div>
+        </Link>
       </div>
     </aside>
   );
