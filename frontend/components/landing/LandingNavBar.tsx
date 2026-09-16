@@ -16,7 +16,10 @@ export function LandingNavBar({ user }: { user: AuthUser | null }) {
           className="brand-mark"
           preload={true}
         />
-        <span className="brand-copy">OweNone</span>
+        <div className="brand-text">
+          <p className="brand-name">OweNone</p>
+          <p className="brand-tag">Untangle group IOUs</p>
+        </div>
       </Link>
       <div className="nav-links">
         {LANDING_NAV_ITEMS.map((item) => (

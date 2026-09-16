@@ -34,13 +34,17 @@ export default async function LoginPage() {
       <div className="auth-card">
         <Link href="/landing" className="auth-brand">
           <Image
-            src="/owenone-logo.png"
-            alt="OweNone"
-            width={390}
-            height={336}
-            className="auth-brand-logo"
+            src="/owenone-mark.png"
+            alt=""
+            width={256}
+            height={259}
+            className="auth-brand-mark"
             preload={true}
           />
+          <div className="auth-brand-text">
+            <p className="auth-brand-name">OweNone</p>
+            <p className="auth-brand-tag">Untangle group IOUs</p>
+          </div>
         </Link>
 
         <h1 className="auth-heading">Welcome back</h1>
