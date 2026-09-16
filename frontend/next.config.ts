@@ -8,6 +8,10 @@ const apiOrigin =
     : "http://localhost:8080");
 
 const nextConfig: NextConfig = {
+  // Vercel multi-service rewrites break `/_next/image`; serve public assets directly.
+  images: {
+    unoptimized: true,
+  },
   turbopack: {
     root: path.resolve(__dirname),
   },
