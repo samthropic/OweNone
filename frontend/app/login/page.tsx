@@ -32,7 +32,7 @@ export default async function LoginPage() {
   return (
     <main className="auth-root">
       <div className="auth-card">
-        <Link href="/landing" className="auth-brand">
+        <Link href="/" className="auth-brand">
           <Image
             src="/owenone-mark.png"
             alt=""

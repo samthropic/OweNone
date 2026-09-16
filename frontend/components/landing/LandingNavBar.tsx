@@ -7,7 +7,7 @@ import { LANDING_NAV_ITEMS } from "./landingData";
 export function LandingNavBar({ user }: { user: AuthUser | null }) {
   return (
     <nav className="landing-nav" aria-label="Primary">
-      <Link href="/landing" className="brand">
+      <Link href="/" className="brand">
         <Image
           src="/owenone-mark.png"
           alt=""

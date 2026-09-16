@@ -77,5 +77,5 @@ export async function logInAction(
 export async function logOutAction(): Promise<void> {
   await logOut();
   await clearSessionCookie();
-  redirect("/landing");
+  redirect("/");
 }

@@ -18,7 +18,7 @@ const MENU_ITEMS: SidebarTab[] = ["Overview", "Friends", "Groups", "Activity", "
 export function HomeSidebar({ user, active = "Overview" }: { user: User; active?: SidebarTab }) {
   return (
     <aside className="home-sidebar">
-      <Link href="/landing" className="home-brand">
+      <Link href="/" className="home-brand">
         <Image
           src="/owenone-mark.png"
           alt=""

@@ -1,8 +1,6 @@
-import "@/components/landing/landing.css";
-import { LandingPage } from "@/components/landing/LandingPage";
-import { getOptionalSessionUser } from "@/lib/api";
+import { redirect } from "next/navigation";
 
-export default async function Landing() {
-  const user = await getOptionalSessionUser();
-  return <LandingPage user={user} />;
+/** Keep /landing working; canonical marketing URL is /. */
+export default function LandingRedirect() {
+  redirect("/");
 }
