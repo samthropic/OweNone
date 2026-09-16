@@ -10,8 +10,15 @@ export class UnauthorizedError extends Error {
   }
 }
 
+function defaultAPIURL() {
+  if (process.env.OWENONE_API_URL) return process.env.OWENONE_API_URL;
+  // Same-deployment Vercel URL so /api/* hits the Go service via rewrites.
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return DEFAULT_API_URL;
+}
+
 function apiURL(path: string) {
-  return new URL(path, process.env.OWENONE_API_URL ?? DEFAULT_API_URL);
+  return new URL(path, defaultAPIURL());
 }
 
 export async function apiRequest<T>(

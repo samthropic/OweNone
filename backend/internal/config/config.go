@@ -19,9 +19,9 @@ type Config struct {
 
 func Load() (Config, error) {
 	config := Config{
-		Address:          envOrDefault("HTTP_ADDRESS", ":8080"),
+		Address:          listenAddress(),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
-		FrontendOrigin:   envOrDefault("FRONTEND_ORIGIN", "http://localhost:3000"),
+		FrontendOrigin:   frontendOrigin(),
 		AvatarDir:        envOrDefault("AVATAR_DIR", "data/avatars"),
 		MaxDBConnections: 10,
 		AutoMigrate:      true,
@@ -52,4 +52,26 @@ func envOrDefault(key, fallback string) string {
 		return value
 	}
 	return fallback
+}
+
+// listenAddress prefers HTTP_ADDRESS, then Vercel's PORT, then :8080.
+func listenAddress() string {
+	if value := os.Getenv("HTTP_ADDRESS"); value != "" {
+		return value
+	}
+	if port := os.Getenv("PORT"); port != "" {
+		return ":" + port
+	}
+	return ":8080"
+}
+
+// frontendOrigin prefers FRONTEND_ORIGIN, then https://VERCEL_URL, then localhost.
+func frontendOrigin() string {
+	if value := os.Getenv("FRONTEND_ORIGIN"); value != "" {
+		return value
+	}
+	if host := os.Getenv("VERCEL_URL"); host != "" {
+		return "https://" + host
+	}
+	return "http://localhost:3000"
 }
