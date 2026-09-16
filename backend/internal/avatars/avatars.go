@@ -26,14 +26,27 @@ type Storage struct {
 	Dir string
 }
 
+// NewStorage persists profile photos on the local filesystem.
+// On read-only hosts (e.g. Vercel) it falls back to a temp directory.
 func NewStorage(dir string) (*Storage, error) {
-	if dir == "" {
-		dir = "data/avatars"
+	candidates := make([]string, 0, 3)
+	if dir != "" {
+		candidates = append(candidates, dir)
 	}
-	if err := os.MkdirAll(dir, 0o755); err != nil {
-		return nil, fmt.Errorf("create avatar dir: %w", err)
+	candidates = append(candidates, "data/avatars", filepath.Join(os.TempDir(), "owenone-avatars"))
+
+	var lastErr error
+	for _, candidate := range candidates {
+		if err := os.MkdirAll(candidate, 0o755); err != nil {
+			lastErr = err
+			continue
+		}
+		return &Storage{Dir: candidate}, nil
 	}
-	return &Storage{Dir: dir}, nil
+	if lastErr == nil {
+		lastErr = fmt.Errorf("no avatar directory candidates")
+	}
+	return nil, fmt.Errorf("create avatar dir: %w", lastErr)
 }
 
 // PublicURL returns the stable public path for a user's avatar.

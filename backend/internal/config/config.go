@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -22,7 +23,7 @@ func Load() (Config, error) {
 		Address:          listenAddress(),
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		FrontendOrigin:   frontendOrigin(),
-		AvatarDir:        envOrDefault("AVATAR_DIR", "data/avatars"),
+		AvatarDir:        avatarDir(),
 		MaxDBConnections: 10,
 		AutoMigrate:      true,
 		ShutdownTimeout:  10 * time.Second,
@@ -74,4 +75,15 @@ func frontendOrigin() string {
 		return "https://" + host
 	}
 	return "http://localhost:3000"
+}
+
+func avatarDir() string {
+	if value := os.Getenv("AVATAR_DIR"); value != "" {
+		return value
+	}
+	// Vercel’s app filesystem is read-only; keep uploads under /tmp.
+	if os.Getenv("VERCEL") != "" {
+		return filepath.Join(os.TempDir(), "owenone-avatars")
+	}
+	return "data/avatars"
 }
